@@ -2,7 +2,7 @@
 
 程序作者：henryyy
 
-运行环境：windows
+运行环境：win 10 （可能要安装python）
 
 使用方法：把小说目录页网址复制进url.txt, 点击运行 网文爬虫v1.0.exe即可。
 
