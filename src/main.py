@@ -55,7 +55,7 @@ version 1.0 支援的网页有
 '''
 
 ## 申请访问的速度（每秒x次）
-speed = 1000
+speed = 100
 ## 需要爬取的章节（最新的x章）
 num_of_chapters = 0
 ## 访问失败累计次数，超过15次则默认网站有反爬虫，终止程序
@@ -80,28 +80,34 @@ def pre_process(line, title_of_chapter):
     if len(line) == 0:
         return ""
     ## 删除行首缩进
-    while line[0] in [" ", "　", '\t']:
+    while len(line) != 0 and line[0] in [" ", "　", "　", '\t', '\n', '\r']:
         line = line[1:]
+    ## 规避空行
+    if len(line) == 0:
+        return ""
     ## 根据全句去除不想要的行
     unwanted_lines = ["", "\n", title_of_chapter]
     for unwanted_line in unwanted_lines:
         if line == unwanted_line:
             return ""
     ## 根据关键词去除不想要的行
-    domains = [".com", ".xyz", ".net", ".top", ".tech", ".org", ".gov", ".edu", ".ink", ".int", ".mil", ".put", ".cn", ".cc", ".biz", ".la",".bqkan8"]
-    keywords = ["</a>", "7017k", "小说网", "小说在线阅读", "零点看书", "---", "()"]
+    domains = ["https://", ".com", ".xyz", ".net", ".top", ".tech", ".org", ".gov", ".edu", ".ink", ".int", ".mil", ".put", ".cn", ".cc", ".biz", ".la",".bqkan8"]
+    keywords = ["</a>", "7017k", "小说网", "小说在线阅读", "零点看书", "---", "()", "小说更新后会发送邮件到您的邮箱"]
     unwanted_keywords = domains + keywords
     for unwanted_keyword in unwanted_keywords:
         if unwanted_keyword in line:
             return ""
     ## 删除关键词
-    unwanted_words = ["&nbsp;", "&emsp;"]
+    unwanted_words = ["&nbsp;", "&emsp;", "&ldquo;", "&rdquo;", "\n", '\r', '\n\r', '\r\n']
     for unwanted_word in unwanted_words:
         line = line.replace(unwanted_word, "")
     ## 替换关键词
     replace_words = {"。。":"。", "、、":"、", "…":"...", "|":""}
     for replaced_word in replace_words.keys():
         line = line.replace(replaced_word, replace_words[replaced_word])
+    ## 规避空行
+    if len(line) == 0:
+        return ""
     return "　　" + line + '\n'
 
 ## 根据url爬取单独章节，并将章节添加到 字典 novel 里
@@ -114,19 +120,19 @@ def chapter_crawler(url_of_chapter, idx, encode, novel):
     ## 根据不同网址定义正则表达式
     if "www.ptwxz.com" in url_of_chapter:
         title_of_chapter_regx = '</a>(.*?)</H1>'
-        content_of_chapter_regx = '&nbsp;&nbsp;&nbsp;&nbsp;(.*?)<br />'
+        content_of_chapter_regx = ['&nbsp;&nbsp;&nbsp;&nbsp;(.*?)<br />']
     elif "www.uuks.org" in url_of_chapter:
         title_of_chapter_regx = '<h1 id="timu">(.*?)</h1>'
-        content_of_chapter_regx = '<p>(.*?)</p>'
+        content_of_chapter_regx = ['<p>(.*?)</p>']
     elif "www.uukanshu.com" in url_of_chapter:
         title_of_chapter_regx = '<h1 id="timu">(.*?)</h1>'
-        content_of_chapter_regx = 'p>(.*?)<'
+        content_of_chapter_regx = ['p>(.*?)<', "br />(.*?)<", '>(.*?)<p', ">(.*?)<br", "[^ ](.*?)<br/>"]
     elif "www.bqxs520.com" in url_of_chapter:
         title_of_chapter_regx = '.*<h1>(.*?)</h1>'
-        content_of_chapter_regx = 'br/>(.*?)<'
+        content_of_chapter_regx = ['br/>(.*?)<']
     elif "https://www.ibiquge.net" in url_of_chapter:
         title_of_chapter_regx = '.*<h1>(.*?)</h1>'
-        content_of_chapter_regx = '&nbsp;(.*?)<|\s'
+        content_of_chapter_regx = ['&nbsp;(.*?)<|\s']
     else:
         return
 
@@ -152,13 +158,18 @@ def chapter_crawler(url_of_chapter, idx, encode, novel):
 
     ## 爬取内容
     try:
-        content_of_chapter = re.findall(content_of_chapter_regx, response_2.text)
+        for regx in content_of_chapter_regx:
+            content_of_chapter = re.findall(regx, response_2.text)
+            if not (len(content_of_chapter) == 0 or (len(content_of_chapter) == 1 and content_of_chapter[0] == "")):
+                break
     except:
         content_of_chapter = [f"{idx+1}节 访问成功 爬取【内容】失败"]
 
     ## 判断内容是否为空
     if len(content_of_chapter) == 0 or (len(content_of_chapter) == 1 and content_of_chapter[0] == ""):
         content_of_chapter = [f"{idx+1}节 访问成功 爬取【内容】失败"]
+        print(response_2.text)
+        time.sleep(1)
 
     chapter_content = f'\n\n{title_of_chapter}\n'
     for line in content_of_chapter:
@@ -171,12 +182,15 @@ def status_bar(current_num_of_keys, total_num_of_keys, start_time, fail_count):
     progress = current_num_of_keys / total_num_of_keys
     num_of_grid = round(progress * 10 * 2)
     time_used = time.time() - start_time
-    print(f'\r进程: {num_of_grid * "■"}{(20 - num_of_grid) * "□"} [{progress*100: >3.0f}%]    已耗时：{time_used:.1f}秒    失败申请：{fail_count}次    ',end="")
+    minutes_used = time_used//60
+    seconds_used = time_used%60
+    print(f'\r进程: {num_of_grid * "■"}{(20 - num_of_grid) * "□"} [{progress*100: >6.2f}%]    已耗时：{minutes_used:.0f}分 {seconds_used:.0f}秒    失败申请：{fail_count}次    ',end="")
 
 ## 爬取目录以及章节对应网址
 def novel_crawler(url_of_book, num_of_chapter, url_of_books):
     global speed
     start_time = time.time()
+    linear = False
 
     ## 根据不同网址定义正则表达式
     if "www.ptwxz.com" in url_of_book:
@@ -188,6 +202,7 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = 0
         stop = None
         step = 1
+        speed = 100
     elif "www.uuks.org" in url_of_book:
         encode = 'UTF-8'
         base_url = 'https://www.uuks.org'
@@ -197,6 +212,7 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = 1
         stop = None
         step = 1
+        speed = 100
     elif "www.uukanshu.com" in url_of_book:
         encode = 'ANSI'
         base_url = 'https://www.uukanshu.com'
@@ -206,6 +222,7 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = -1
         stop = 0
         step = -1
+        speed = 50
     elif "http://www.bqxs520.com" in url_of_book:
         encode = 'UTF-8'
         base_url = 'http://www.bqxs520.com'
@@ -224,7 +241,8 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = 12
         stop = None
         step = 1
-        speed = 1
+        speed = 0.5
+        linear = True
     else:
         return
 
@@ -269,11 +287,14 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
     access_rate = 1/speed
     ## 多线程执行章节爬取，导入字典中
     for idx in range(start, stop):
-        time.sleep(access_rate)
         status_bar(len(novel.keys()), total, start_time, fail_count)
         url_of_chapter = url_of_chapters[idx]
         try:
-            _thread.start_new_thread(chapter_crawler, (url_of_chapter, idx, encode, novel))
+            if linear == True:
+                chapter_crawler(url_of_chapter, idx, encode, novel)
+            else:
+                _thread.start_new_thread(chapter_crawler, (url_of_chapter, idx, encode, novel))
+                time.sleep(access_rate)
         except:
             print("Fail to crawl chapter", idx)
 
@@ -295,13 +316,6 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
 
     keys = sorted(novel.keys())
 
-    ## 统计全文中文字符字数
-    word_count = 0
-    for idx in keys:
-        for s in novel[idx]:
-            if '\u4e00' <= s and s <= '\u9fff':
-                word_count += 1
-
     extension = "" if start == 0 else f"({start+1}-{stop})"
 
     ##打开文件
@@ -313,6 +327,13 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
     except:
         pass
     print(f"提示：{save_path} 已创建")
+
+    ## 统计全文中文字符字数
+    word_count = 0
+    for idx in keys:
+        for s in novel[idx]:
+            if '\u4e00' <= s and s <= '\u9fff':
+                word_count += 1
 
     ## 开始写入文件
     fout = open(save_path, 'a+', encoding=encode)
