@@ -4,8 +4,7 @@ import os
 import _thread
 import time
 import codecs
-import sys
-import psutil
+from my_fake_useragent import UserAgent
 
 '''
 1. https://www.uuks.org     UU看书 - 质量高，没广告，书少
@@ -30,15 +29,15 @@ file_default_content = \
 程序作者：henryyy
 运行环境：windows
 使用方法：把小说目录页网址复制进横线下任意一行，若想程序爬取该小说，请务必确保该行内没有任何多余字符，如行首空格
-程序简介：爬取小说，自动排版，自动去广告，数字数，输出TXT文件转换为UTF-8编码，速度为每秒1000次申请访问。
+程序简介：爬取小说，自动排版，自动去广告，数字数，输出TXT文件转换为UTF-8编码，速度为每秒100次申请访问。
 作者声明：此程序仅供学习交流之用途，请勿用于任何商业用途。所有小说仅供试阅读，小说的版权归原作者/网站/出版社所有，请勿用于任何商业用途。作者对任何不当使用概不负责。
 
 version 1.0 支援的网页有
-1. UU看书：https://www.uuks.org - 质量高，没广告，书少
-2. UU看书：https://www.uukanshu.com - 质量普通，有广告
-3. 飘天文学：https://www.ptwxz.com - 质量高，书多
-4. 笔趣阁：http://www.bqxs520.com - 章节全，质量差
-5. 笔趣阁：https://www.ibiquge.net - 爬取慢，章节缺失
+1. UU看书：https://www.uuks.org - 优点：质量高。缺点：书籍少
+2. UU看书：https://www.uukanshu.com - 优点：书籍较多。缺点：质量中等
+3. 飘天文学：https://www.ptwxz.com - 优点：质量高。缺点：书籍少
+4. 笔趣阁：http://www.bqxs520.com - 优点：章节全。缺点：质量低
+5. 笔趣阁：https://www.ibiquge.net - 优点：书籍特别多。缺点：爬取特别慢，质量低
 
 ---------------------------------------------------------------------------------------
 
@@ -86,13 +85,13 @@ def pre_process(line, title_of_chapter):
     if len(line) == 0:
         return ""
     ## 根据全句去除不想要的行
-    unwanted_lines = ["", "\n", title_of_chapter]
+    unwanted_lines = ["", "\n", title_of_chapter,"《"]
     for unwanted_line in unwanted_lines:
         if line == unwanted_line:
             return ""
     ## 根据关键词去除不想要的行
     domains = ["https://", ".com", ".xyz", ".net", ".top", ".tech", ".org", ".gov", ".edu", ".ink", ".int", ".mil", ".put", ".cn", ".cc", ".biz", ".la",".bqkan8"]
-    keywords = ["</a>", "7017k", "小说网", "小说在线阅读", "零点看书", "---", "()", "小说更新后会发送邮件到您的邮箱"]
+    keywords = ["</a>", "7017k", "小说网", "小说在线阅读", "零点看书", "---", "()", "小说更新后会发送邮件到您的邮箱", "正在手打中，请稍等片刻，内容更新后，请重新刷新页面，即可获取最新更新！"]
     unwanted_keywords = domains + keywords
     for unwanted_keyword in unwanted_keywords:
         if unwanted_keyword in line:
@@ -115,7 +114,7 @@ def chapter_crawler(url_of_chapter, idx, encode, novel):
     ## 查看累计访问失败次数
     global fail_count
     if fail_count >= 20:
-        return
+        time.sleep(10)
 
     ## 根据不同网址定义正则表达式
     if "www.ptwxz.com" in url_of_chapter:
@@ -136,9 +135,13 @@ def chapter_crawler(url_of_chapter, idx, encode, novel):
     else:
         return
 
+    ua = UserAgent(family='chrome')
+    res = ua.random()
+    headers = {"User-Agent":res}
+
     ## 爬取网站内容
     try:
-        response_2 = requests.get(url_of_chapter)
+        response_2 = requests.get(url=url_of_chapter, headers=headers)
         response_2.encoding = encode
     except:
         time.sleep(0.1)
@@ -190,7 +193,6 @@ def status_bar(current_num_of_keys, total_num_of_keys, start_time, fail_count):
 def novel_crawler(url_of_book, num_of_chapter, url_of_books):
     global speed
     start_time = time.time()
-    linear = False
 
     ## 根据不同网址定义正则表达式
     if "www.ptwxz.com" in url_of_book:
@@ -232,6 +234,7 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = 9
         stop = None
         step = 1
+        speed = 100
     elif "https://www.ibiquge.net" in url_of_book:
         encode = 'UTF-8'
         base_url = 'https://www.ibiquge.net'
@@ -241,17 +244,20 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = 12
         stop = None
         step = 1
-        speed = 0.5
-        linear = True
+        speed = 20
     else:
         return
 
     ## 小说储存区，类似于缓冲区
     novel = dict()
 
+    ua = UserAgent(family='chrome')
+    res = ua.random()
+    headers = {"User-Agent":res}
+
     ## 爬取目录页面内容
     try:
-        response_1 = requests.get(url_of_book)
+        response_1 = requests.get(url=url_of_book, headers=headers)
         response_1.encoding = encode
     except:
         print("爬取目录失败")
@@ -290,11 +296,8 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         status_bar(len(novel.keys()), total, start_time, fail_count)
         url_of_chapter = url_of_chapters[idx]
         try:
-            if linear == True:
-                chapter_crawler(url_of_chapter, idx, encode, novel)
-            else:
-                _thread.start_new_thread(chapter_crawler, (url_of_chapter, idx, encode, novel))
-                time.sleep(access_rate)
+            _thread.start_new_thread(chapter_crawler, (url_of_chapter, idx, encode, novel))
+            time.sleep(access_rate)
         except:
             print("Fail to crawl chapter", idx)
 
@@ -347,8 +350,9 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
     ##fout.write(declaration)
     for idx in keys:
         fout.write(novel[idx])
-    print(f"结果：{start+1} 至 {stop} 章已被写入 {save_path}")
     fout.close()
+
+    print(f"结果：{start+1} 至 {stop} 章已被写入 {save_path}")
 
     if encode != 'UTF-8':
         convert_to_utf8(save_path)
