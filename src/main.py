@@ -4,7 +4,6 @@ import time
 import codecs
 import _thread
 import requests
-import numpy as np
 from my_fake_useragent import UserAgent
 
 file_default_content = \
@@ -51,7 +50,7 @@ file_default_content = \
 '''
 
 ## 申请访问的速度（每秒x次）
-speed = 100
+speed = 20
 ## 需要爬取的章节（最新的x章）
 num_of_chapters = 0
 
@@ -217,10 +216,10 @@ def chapter_crawler(url_of_chapter, idx, encode, novel, report, chapter_word_cou
 
 ## 爬取目录以及章节对应网址
 def novel_crawler(url_of_book, num_of_chapter, url_of_books):
-    ## 导入速度变量
-    global speed
     ## 记录线程启动时间
     start_time = time.time()
+    ## 是否锁定速度
+    lock_speed = False
 
     ## 根据不同网址定义正则表达式
     if "www.ptwxz.com" in url_of_book:
@@ -232,7 +231,7 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = 0
         stop = None
         step = 1
-        speed = 100
+        specialized_speed = 100
     elif "www.uuks.org" in url_of_book:
         encode = 'UTF-8'
         base_url = 'https://www.uuks.org'
@@ -242,7 +241,7 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = 1
         stop = None
         step = 1
-        speed = 100
+        specialized_speed = 100
     elif "www.uukanshu.com" in url_of_book:
         encode = 'ANSI'
         base_url = 'https://www.uukanshu.com'
@@ -252,7 +251,7 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = -1
         stop = 0
         step = -1
-        speed = 50
+        specialized_speed = 50
     elif "http://www.bqxs520.com" in url_of_book:
         encode = 'UTF-8'
         base_url = 'http://www.bqxs520.com'
@@ -262,7 +261,7 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = 9
         stop = None
         step = 1
-        speed = 100
+        specialized_speed = 100
     elif "https://www.ibiquge.net" in url_of_book:
         encode = 'UTF-8'
         base_url = 'https://www.ibiquge.net'
@@ -272,7 +271,7 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = 12
         stop = None
         step = 1
-        speed = 20
+        specialized_speed = 20
     elif "https://www.bobozw.com/" in url_of_book:
         encode = 'ANSI'
         base_url = "https://www.bobozw.com/"
@@ -282,7 +281,7 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         start = 0
         stop = None
         step = 1
-        speed = 30
+        specialized_speed = 30
     else:
         ## 如果不在预定义网址内，啧将html文件导出至【错误报告.txt】
         encode = "ANSI"
@@ -297,6 +296,11 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
         print(f"【错误报告.txt】已创建")
         url_of_books.remove(url_of_book)
         return 1
+
+    ## 如果没锁速度，则火力全开
+    if not lock_speed:
+        global speed
+        speed = specialized_speed
 
     ## 【小说内容缓存区】
     novel = dict()
@@ -371,8 +375,10 @@ def novel_crawler(url_of_book, num_of_chapter, url_of_books):
 
     ## 统计全文中文字符字数
     total_word_count = sum(list(chapter_word_counts.values()))
-    avg = np.mean(list(chapter_word_counts.values()))
-    print(f"字数：{total_word_count/10000:.1f}万  ->  平均每章 {round(avg)} 字")
+    mean_word_count = total_word_count/len(list(chapter_word_counts.values()))
+
+    ## 输出字数统计
+    print(f"字数：{total_word_count/10000:.1f}万  ->  平均每章 {round(mean_word_count)} 字")
 
     ## 开始写入txt文件
     try:
@@ -477,4 +483,5 @@ def main():
 
 main()
 
+## 打包前 锁死速度 + 最后加input
 ## pyinstaller -F main.py
