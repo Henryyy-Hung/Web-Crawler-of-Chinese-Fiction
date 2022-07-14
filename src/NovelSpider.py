@@ -529,6 +529,9 @@ class NovelSpider(object):
         ## 根据url调整参数
         if self.auto_setting(self.url_of_book) == False:
             return False
+        ## 制作应用时限制一下
+        if self.speed_of_crawling > 5:
+            self.__speed_of_crawling = 5
         ## 通过url爬取【书籍信息】以及【所有章节的链接】
         status = self.crawl_content_page()
         if status == False:

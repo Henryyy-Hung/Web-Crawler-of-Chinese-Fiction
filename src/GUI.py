@@ -127,7 +127,7 @@ class SpiderGUI(object):
 
         ## 创建选项列表
         for book_name in self.book_info.keys():
-            self.create_choice_button(book_name)
+            self.create_choice_button(book_title=book_name)
 
         manual = \
 '''\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n
@@ -147,7 +147,6 @@ class SpiderGUI(object):
 　　5. 笔趣阁：https://www.ibiquge.net 
 　　　　优点：书籍特别多。缺点：爬取特别慢，质量低\n\n
 '''
-
         disclaimer = \
 '''
 免责声明（Disclaimer)\n
@@ -214,13 +213,16 @@ Github链接\n
         for choice_button in self.choice_buttons.copy():
             if choice_button.var.get() == True:
                 urls.append(self.book_info[choice_button.cget("text")])
+
         ## 如果没有链接，禁止启动爬虫
         if urls == []:
             return None
         ## 禁止同时启动第二只爬虫
         self.start_button['state'] = DISABLED
+
         ## 翻转顺序，先进先出
         urls = reversed(urls)
+
         ## 定义top level变量
         top_background_color = 'white'
         top_forebackground_color = 'black'
@@ -228,6 +230,7 @@ Github链接\n
         style = ttk.Style()
         style.theme_use('alt')
         style.configure("blue.Horizontal.TProgressbar", foreground='#b6cbde', background='#b6cbde')
+
         ## 创建弹窗
         self.top = Toplevel(master=self.master, bg=top_background_color)
         self.top.title('小说爬取进度')
@@ -238,8 +241,8 @@ Github链接\n
         self.top.iconbitmap(self.master_icon_path)
         self.top.attributes('-alpha', 0.9)
         self.top.resizable(False, False)
-        self.top.attributes('-disabled', True)
-        ##self.master.attributes('-disabled', True)
+        self.top.wm_transient(self.master)
+
         ## 创建标签
         self.title_label = Label(master=self.top, text="书名：获取响应中...", bg=top_background_color, fg=top_forebackground_color, font=top_label_font, anchor=W)
         self.title_label.place(anchor=CENTER, relx=0.5, rely=0.2, relwidth=0.9, relheight=0.2)
@@ -250,13 +253,6 @@ Github链接\n
         ## 创建进度条
         self.progress_bar = ttk.Progressbar(master=self.top, maximum=10000, value=0, style="red.Horizontal.TProgressbar")
         self.progress_bar.place(anchor=CENTER, relx=0.5, rely=0.65, relwidth=0.9, relheight=0.2)
-        ## 开始爬取书籍
-        for url in urls:
-            spider = NovelSpider.NovelSpider(self)
-            spider.url_of_book = url
-            spider.crawl_novel()
-        self.top.attributes('-disabled', False)
-        ##self.master.attributes('-disabled', False)
         def on_closing():
         ## 删除小窗
             self.top.update()
@@ -267,13 +263,17 @@ Github链接\n
             self.top.destroy()
             self.start_button['state'] = ACTIVE
         self.top.protocol("WM_DELETE_WINDOW", on_closing)
-
+        ## 开始爬取书籍
+        for url in urls:
+            spider = NovelSpider.NovelSpider(self)
+            spider.url_of_book = url
+            spider.crawl_novel()
 
     def add_book(self):
         title = self.book_title_entry.get()
         url = self.book_url_entry.get()
         if title not in self.book_info.keys() and title != '书名' and url != "链接" and "http" in url :
-            self.create_choice_button(book_title=title, book_url=url)
+            self.create_choice_button(book_title=title, book_url=url, selected=True)
             self.book_title_entry.delete(0, END)
             self.book_url_entry.delete(0, END)
             self.book_title_entry.insert(0, '书名')
@@ -342,14 +342,17 @@ Github链接\n
         if self.book_url_entry.get() == '链接':
             self.book_url_entry.delete(0, END)
 
-    def create_choice_button(self, book_title="未知", book_url=""):
+    def create_choice_button(self, book_title="未知", book_url="", selected=False):
         self.choice_panel.config(state=NORMAL)
         if book_title not in self.book_info.keys():
             self.book_info[book_title] = book_url
         var = IntVar()
         choice_button = Checkbutton(self.choice_panel, text=book_title, bg=self.choice_button_background_color, anchor='w', font=self.choice_button_font, variable=var, onvalue=1, offvalue=0)
         choice_button.var = var
-        choice_button.select()
+        if selected==True:
+            choice_button.select()
+        else:
+            choice_button.deselect()
         self.choice_buttons.append(choice_button)
         self.choice_panel.window_create('1.0', window=choice_button)
         self.choice_panel.insert('1.0', '\n')
