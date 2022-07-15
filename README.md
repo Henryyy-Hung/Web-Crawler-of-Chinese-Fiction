@@ -12,7 +12,7 @@
 
 ## **★支援的网站★**
 
-　　1. 31小说网：https://www.31xs.net 
+　　**1. 31小说网：https://www.31xs.net**
 　　　　更新快，质量高。缺点：有点不稳定
 
 　　2. UU看书：https://www.uuks.org 
