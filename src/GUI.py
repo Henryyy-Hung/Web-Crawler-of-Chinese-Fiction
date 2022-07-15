@@ -303,6 +303,12 @@ class SpiderGUI(object):
             if self.latest_chapter_only_check_button.var.get() == True:
                 spider.num_of_chapters_wanted = 100
             spider.crawl_novel()
+            ## 爬取后取消勾选
+            for choice_button in self.choice_buttons:
+                if choice_button.var.get() == True and self.book_info[choice_button.cget("text")] == url:
+                    choice_button.deselect()
+
+        on_closing()
 
     ## 将书籍从输入框添加进缓存区
     def add_book(self):
