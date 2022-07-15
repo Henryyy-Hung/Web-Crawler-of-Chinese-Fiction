@@ -1,6 +1,7 @@
 import re
 import html
 
+## 处理小说标题
 def process_title(line):
     ## 规避空行
     if len(line) == 0:
@@ -10,13 +11,17 @@ def process_title(line):
         line = line[1:]
     return line
 
+## 处理小说段落
 def process_paragraph(string):
+    ## 将html语言翻译成人类语言
     string = html.unescape(string)
-    ##string = re.sub(pattern=r'&[a-zA-z0-9]*;', repl="", string=string)
+    ## 清除剩余html元素
     string = re.sub(pattern=r'<.*>.*<.*>;', repl="", string=string, flags=re.DOTALL)
+    ## 翻译剩余html语言
     translate = {'<br>':'\n', '<br/>':'\n', '<br />':'\n', '<p>':'', '<p/>':'\n', ' ':' '}
     for key in translate.keys():
         string = string.replace(key, translate[key])
+    ## 分行
     lines = string.split('\n')
     output = []
     for line in lines:
@@ -24,10 +29,12 @@ def process_paragraph(string):
             output.append(line)
     return output
 
+## 处理小说句子
 def process_line(line, title_of_chapter = "No_Such_title"):
     ## 规避空行
     if len(line) == 0:
         return ""
+    ## 清除剩余html元素
     line = re.sub(pattern='<.*>.*?</.*>', repl='', string=line)
     ## 删除行首缩进
     while len(line) != 0 and line[0] in [" ", "　", "　", '\t', '\n', '\r']:
@@ -64,6 +71,7 @@ def process_line(line, title_of_chapter = "No_Such_title"):
         return ""
     return "　　" + line + '\n'
 
+## 数中文字数
 def word_count_of_chin_char(string):
     output = 0
     for char in string:
