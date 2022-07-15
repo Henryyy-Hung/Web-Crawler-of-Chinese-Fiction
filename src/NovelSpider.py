@@ -353,13 +353,17 @@ class NovelSpider(object):
         try:
             response = self.get_response(self.url_of_book)
         except:
-            self.msgbox(target='notice_label', value=f'提示：【{self.url_of_book}】访问内容失败。')
+            self.msgbox(target='title_label', value=f'书名：爬取失败')
+            self.msgbox(target='author_label', value=f'作者：爬取失败')
+            self.msgbox(target='notice_label', value=f'提示：无法访问内容，书籍目录页面爬取失败。')
             return False
         ## 爬取书籍名称
         if self.title_of_book == '':
             title_of_book = self.extract_word(response, self.regx_of_book_title)
             if len(title_of_book) == 0:
-                self.msgbox(target='notice_label', value=f'提示：【{self.url_of_book}】爬取书籍名称失败。')
+                self.msgbox(target='title_label', value=f'书名：爬取失败')
+                self.msgbox(target='author_label', value=f'作者：爬取失败')
+                self.msgbox(target='notice_label', value=f'提示：书籍标题爬取失败。')
                 return False
             title_of_book = title_of_book[0]
             self.title_of_book = title_of_book
@@ -367,7 +371,8 @@ class NovelSpider(object):
         if self.author_of_book == '':
             author_of_book = self.extract_word(response, self.regx_of_book_author)
             if len(author_of_book) == 0:
-                self.msgbox(target='notice_label', value=f'提示：【{self.url_of_book}】爬取书籍作者失败。')
+                self.msgbox(target='author_label', value=f'作者：爬取失败')
+                self.msgbox(target='notice_label', value=f'提示：书籍作者爬取失败。')
                 return False
             author_of_book = author_of_book[0]
             self.author_of_book = author_of_book
@@ -375,7 +380,7 @@ class NovelSpider(object):
         if True:
             href_of_chapters = self.extract_word(response, self.regx_of_chap_href)
             if len(href_of_chapters) == 0:
-                self.msgbox(target='notice_label', value=f'提示：【{self.url_of_book}】爬取目录链接失败。')
+                self.msgbox(target='notice_label', value=f'提示：书籍目录链接爬取内容失败。')
                 return False
             if isinstance(href_of_chapters[0], tuple):
                 url_of_chapters = [self.base_url + href[0] if href[0] != '' else href[1] for href in href_of_chapters]
@@ -448,6 +453,9 @@ class NovelSpider(object):
     def crawl_novel(self):
         ## 根据url调整参数
         if self.auto_setting(self.url_of_book) == False:
+            self.msgbox(target='title_label', value=f'书名：爬取失败')
+            self.msgbox(target='author_label', value=f'作者：爬取失败')
+            self.msgbox(target='notice_label', value=f'提示：该书籍链接不属于预定义范围，爬取失败。')
             return False
         ## 通过url爬取【书籍信息】以及【所有章节的链接】
         if self.crawl_content_page() == False:
@@ -487,10 +495,17 @@ class NovelSpider(object):
             self.status_bar()
         self.status_bar()
         self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，保存文件中。')
-        ## 保存文件
-        self.save_novel()
-        ## 生成提示
-        self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，已保存在当前工作目录。')
+        try:
+            ## 保存文件
+            self.save_novel()
+            time.sleep(1)
+            ## 生成提示
+            self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，已保存在当前工作目录。')
+        except:
+            ## 生成提示
+            self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，文件保存失败。')
+        finally:
+            time.sleep(1)
 
     ## 预定义指定网站的参数
     def auto_setting(self, url):
