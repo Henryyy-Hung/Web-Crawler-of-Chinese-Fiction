@@ -1,5 +1,4 @@
-![image](https://user-images.githubusercontent.com/78750074/178976903-fd9bf21e-2004-4b07-8547-24aa0f2f9c48.png)
-
+![image](https://user-images.githubusercontent.com/78750074/179151828-2546a595-d275-451f-97ee-c9ee52f562ab.png)
 
 ## **★制作目的★**
 
