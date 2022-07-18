@@ -1,4 +1,3 @@
-![未标题-2](https://user-images.githubusercontent.com/78750074/179153333-c544e2c9-b499-43d4-96a2-79edf1a1ee0c.jpg)
 
 ## **基本资料**
 
@@ -8,6 +7,7 @@
 
 功能：从网站下载网文，自动校对等。
 
+![未标题-2](https://user-images.githubusercontent.com/78750074/179153333-c544e2c9-b499-43d4-96a2-79edf1a1ee0c.jpg)
 
 ## **制作目的**
 
