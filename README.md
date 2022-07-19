@@ -23,15 +23,15 @@
 * 注：用户可在应用程序同一文件夹下找到名为 `book_info.html` 的文件，那就是用户自己创建的书单，别删掉。
 
 ## **支援的网站**
-1. 31小说网：*https://www.31xs.net*
+1. 31小说网：*https://www.31xs.net* `73000本书`
     * 更新快，质量高。缺点：有点不稳定
-2. UU看书：*https://www.uuks.org*
+2. UU看书：*https://www.uuks.org* `65000本书`
     * 优点：质量高。缺点：书籍少
-3. 飘天文学：*https://www.ptwxz.com*
+3. 飘天文学：*https://www.ptwxz.com* `8800本书`
     * 优点：质量高。缺点：书籍少
-4. 笔趣阁：*http://www.bqxs520.com*
+4. 笔趣阁：*http://www.bqxs520.com* `未统计`
     * 优点：章节全。缺点：质量低
-5. 笔趣阁：*https://www.ibiquge.net*
+5. 笔趣阁：*https://www.ibiquge.net* `未统计`
     * 优点：书籍特别多。缺点：爬取特别慢，质量低
 
 ## **未来更新计划**
