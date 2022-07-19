@@ -3,7 +3,7 @@
 * 名称：【小说爬虫】
 * 版本：1.1
 * 功能：从网站下载网文，自动校对等。
-* 下载链家：[点此下载](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/%E5%B0%8F%E8%AF%B4%E7%88%AC%E8%99%ABv1.1.exe?raw=true)
+* 下载链接：[点此下载](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/%E5%B0%8F%E8%AF%B4%E7%88%AC%E8%99%ABv1.1.exe?raw=true)
 
 <img src="https://user-images.githubusercontent.com/78750074/179153333-c544e2c9-b499-43d4-96a2-79edf1a1ee0c.jpg" alt="demo" width="640" height="320" />
 
