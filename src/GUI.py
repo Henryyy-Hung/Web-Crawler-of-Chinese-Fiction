@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 import os
+import re
 import sys
 import time
-import pickle
+import webbrowser
 import NovelSpider
 from tkinter import *
 from tkinter import ttk
@@ -13,67 +14,111 @@ from tkinter import font as tkFont
 from pypinyin import pinyin, Style
 from tkinter.scrolledtext import ScrolledText
 
-## 关于应用程序的一些介绍及免责声明
-document = '\n'*24 + \
+html_prefix =\
 '''
-★制作目的★
 
-　　制作目的：该软件旨在将指定阅读网站中，无法下载的网文，下载并保存为已校对txt文档。并且一经保存，后续可以一键下载网站上该作品的最新章节。
+<!DOCTYPE HTML>
+<html>
+
+  <head>
+  
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/ >
+		
+    <title>我的书单</title>
+	
+    <base target="_blank"/>
+	
+    <!-- no link -->
+	
+    <meta name="author" content="小说爬虫" />
+	<meta name="generator" content="小说爬虫" />
+	<meta name="description" content="用户自定义的书单" />
+	<meta name="keywords" content="自定义书单,爬虫" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	
+    <!-- no script -->
+	
+    <style type="text/css" media="screen">
+	body {
+	background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
+	}
+	#header {
+	color:black;
+	text-align:center;
+	text-shadow: 2px 2px 2px #bbbbbb;
+	}
+	#section {
+	align:center;
+	}
+	#book_list {
+	display: table;
+    margin: 0 auto;
+	font-size:x-large;
+	max-width: 16em;
+	}
+	#footer {
+	border-top: #bbbbbb solid 2px;
+	background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
+	color:black;
+	text-align:right;
+    position:fixed;
+    bottom:0em;
+	width:99%;
+	padding: 0.5em 0 0.5em 0;
+	}
+	a:link {
+	color: black;
+	background-color: transparent;
+	text-decoration: none;
+	}
+	a:visited {
+	color: black;
+	background-color: transparent;
+	text-decoration: none;
+	}
+	a:hover {
+	color: blue;
+	background-color: transparent;
+	text-decoration: none;
+	}
+	a:active {
+	color: blue;
+	background-color: transparent;
+	text-decoration: none;
+	}
+	</style>
+		
+  </head>
+	
+  <body>
+  
+    <div id="header">
+	  <h1>我的书单</h1>
+	  <hr />
+	</div>
+	
+	<div id="section">
+	  <div id="book_list">
+	    <ol>
+'''
+
+html_postfix =\
+'''
+		</ol>
+		<br />
+	  </div>
+	</div>
+
+	<div id="footer">
+	  <address>
+		软件主页:&nbsp;<a href="https://github.com/Henryyy-Hung/Web-Spider-of-Chinese-Fiction"><i>点此跳转</i></a>&nbsp;<br />
+	  </address>
+	</div>
 
 
-★使用方法★
+  </body>
 
-　　将书名输入【书名栏】中，将对应小说的【--目录页面--】网址链接输入【链接栏】中，点击【添加数据】，即可将书籍放入候选区（也就是左上方的滚动屏幕的最顶端）。在候选区点击选中数据，点击【启动爬虫】，即可下载。
-
-
-★支援的网站★
-
-　　1. 31小说网：https://www.31xs.net 
-　　　　更新快，质量高。缺点：有点不稳定
-
-　　2. UU看书：https://www.uuks.org 
-　　　　优点：质量高。缺点：书籍少
-
-　　3. 飘天文学：https://www.ptwxz.com 
-　　　　优点：质量高。缺点：书籍少
-
-　　4. 笔趣阁：http://www.bqxs520.com 
-　　　　优点：章节全。缺点：质量低
-
-　　5. 笔趣阁：https://www.ibiquge.net 
-　　　　优点：书籍特别多。缺点：爬取特别慢，质量低
-
-
-★免责声明（Disclaimer)★
-
-　　【小说爬虫v1.0】是一款解析指定规则并获取内容的工具，为广大网络文学爱好者提供一种方便、快捷舒适的试读体验。
-
-　　您可以自行浏览源代码，添加正则表达式，从选定的网页上下载文字至txt文档，也可使用预定义的网站。
-
-　　各第三方网站返回的内容与【小说爬虫v1.0】无关，【小说爬虫v1.0】对其概不负责，亦不承担任何法律责任。
-
-　　任何通过使用【小说爬虫v1.0】而链接到的第三方网页均为他人制作或提供，您可能从第三方网页上获得其他服务，【小说爬虫v1.0】对其合法性概不负责，亦不承担任何法律责任。
-
-　　您可能从第三方网页上获得其他服务，【小说爬虫v1.0】对其合法性概不负责，亦不承担任何法律责任。
-
-　　对于第三方网站之内容与立场，【小说爬虫v1.0】不会支持或反对，您应该对下载文章的内容自行承担风险。
-
-　　【小说爬虫v1.0】不做任何形式的保证：不保证搜索服务不中断，不保证搜索结果的安全性、正确性、及时性、合法性。
-
-　　因网络状况、通讯线路、第三方网站等任何原因而导致您不能正常使用【小说爬虫v1.0】，阅读不承担任何法律责任。
-
-　　【小说爬虫v1.0】致力于最大程度地减少网络文学阅读者在自行搜寻txt文档过程中的无意义的时间浪费
-
-　　【小说爬虫v1.0】鼓励广大小说爱好者通过阅读发现优秀网络小说及其提供商，并建议阅读正版图书。
-
-　　任何单位或个人认为通过【小说爬虫v1.0】搜索链接到的第三方网页内容可能涉嫌侵犯其信息网络传播权，应该及时向阅读提出书面权力通知，并提供身份证明、权属证明及详细侵权情况证明。
-
-　　【小说爬虫v1.0】在收到上述法律文件后，将会依法尽快断开相关链接内容。
-
-
-★Github链接★
-
-　　https://github.com/Henryyy-Hung/chinese_novel_crawler
+</html>
 '''
 
 ## 用于爬取网络小说的爬虫对象
@@ -83,17 +128,14 @@ class SpiderGUI(object):
         ## 设置选项容器
         self.choice_buttons = []
 
+        self.book_info = dict()
         ## 载入历史记录
-        if os.path.exists('book_info.pkl'):
-            fin = open('book_info.pkl', 'rb')
-            self.book_info = pickle.load(fin)
-            fin.close()
-        else:
-            self.book_info = dict()
+        if os.path.exists('book_info.html'):
+            self.load_info_list()
 
         ## 预定义主窗口变量
         self.background_color = '#bdc0c8'
-        self.master_frame_title = '小说爬虫 v1.0'
+        self.master_frame_title = '小说爬虫  v1.1'
         self.master_frame_width = 600
         self.master_frame_height = 450
         self.master_icon_path = self.get_resource_path(f'{"img"}{os.sep}{"icon.ico"}') #f'{os.getcwd()}{os.sep}{"img"}{os.sep}{"icon.ico"}'
@@ -148,26 +190,26 @@ class SpiderGUI(object):
 
         ## 创建按钮
         ## 爬虫启动按钮
-        self.start_button = Button(master=self.level_1_S_frame, text="启动爬虫", command=self.release_spider, font=self.button_font, bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
+        self.start_button = Button(master=self.level_1_S_frame, text="开始下载", command=self.release_spider, font=self.button_font, bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
         self.start_button.place(anchor=CENTER, relx=0.5, rely=0.5, relwidth=0.4, relheight=0.6)
         ## 添加书籍资料按钮
         self.add_book_button = Button(master=self.level_3_SE_frame, text="添加数据", command=self.add_book, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
         self.add_book_button.place(anchor=CENTER, relx=0.5, rely=0.5, relwidth=0.9, relheight=0.7)
         ## 全选表单按钮
-        self.select_all_button = Button(master=self.level_3_NE_frame, text="全选", command=self.select_all, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
+        self.select_all_button = Button(master=self.level_3_NE_frame, text="全选书单", command=self.select_all, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
         self.select_all_button.place(anchor=CENTER, relx=0.5, rely=0.1, relwidth=0.9, relheight=0.125)
         ## 全不选表单按钮
-        self.cancel_select_all_button = Button(master=self.level_3_NE_frame, text="全不选", command=self.cancel_select_all, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
+        self.cancel_select_all_button = Button(master=self.level_3_NE_frame, text="取消全选", command=self.cancel_select_all, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
         self.cancel_select_all_button.place(anchor=CENTER, relx=0.5, rely=0.3, relwidth=0.9, relheight=0.125)
         ## 删除选中表单按钮
-        self.delete_selected_button = Button(master=self.level_3_NE_frame, text="删除所选", command=self.delete_selected, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
+        self.delete_selected_button = Button(master=self.level_3_NE_frame, text="删除已选", command=self.delete_selected, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
         self.delete_selected_button.place(anchor=CENTER, relx=0.5, rely=0.5, relwidth=0.9, relheight=0.125)
         ## 保存表单按钮
-        self.save_info_list_button = Button(master=self.level_3_NE_frame, text="保存列表", command=self.save_info_list, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
+        self.save_info_list_button = Button(master=self.level_3_NE_frame, text="保存书单", command=self.save_info_list, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
         self.save_info_list_button.place(anchor=CENTER, relx=0.5, rely=0.7, relwidth=0.9, relheight=0.125)
         ## 打赏按钮
-        self.about_software_button = Button(master=self.level_3_NE_frame, text="别点这里", command=self.about_software, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
-        self.about_software_button.place(anchor=CENTER, relx=0.5, rely=0.9, relwidth=0.9, relheight=0.125)
+        self.open_save_path_button = Button(master=self.level_3_NE_frame, text="查看文件", command=self.open_save_path, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
+        self.open_save_path_button.place(anchor=CENTER, relx=0.5, rely=0.9, relwidth=0.9, relheight=0.125)
 
         ## 预定义输入框变量
         self.entry_font = tkFont.Font(size=15, weight='bold')
@@ -186,7 +228,7 @@ class SpiderGUI(object):
         self.book_url_entry.bind("<Button-1>", self.clear_book_url_entry_text)
 
         ## 创建滚动面板
-        self.choice_panel = ScrolledText(master=self.level_3_NW_frame, selectbackground=self.button_background_color)
+        self.choice_panel = ScrolledText(master=self.level_3_NW_frame, selectbackground='white', selectforeground='blue')
         self.choice_panel.place(anchor=CENTER, relx=0.5, rely=0.5, relwidth=0.95, relheight=0.95)
 
         ## 列表选项变量
@@ -195,7 +237,7 @@ class SpiderGUI(object):
 
         ## 爬取最近100章选项框
         var = IntVar()
-        self.latest_chapter_only_check_button = Checkbutton(master=self.level_1_S_frame, text="最近一百章", bg=self.background_color, activebackground=self.background_color, anchor='w', font=self.choice_button_font, variable=var, onvalue=1, offvalue=0)
+        self.latest_chapter_only_check_button = Checkbutton(master=self.level_1_S_frame, text="仅最新100章", bg=self.background_color, activebackground=self.background_color, anchor='w', font=self.choice_button_font, variable=var, onvalue=1, offvalue=0)
         self.latest_chapter_only_check_button.var = var
         self.latest_chapter_only_check_button.place(anchor=W, relx=0.75, rely=0.5)
 
@@ -203,10 +245,18 @@ class SpiderGUI(object):
         for book_name in sorted(self.book_info.keys(), key=self.to_pinyin, reverse=True):
             self.create_choice_button(book_title=book_name)
 
-        ## 写入文档（介绍，使用方法，免责声明等）
-        self.choice_panel.config(state=NORMAL)
-        self.choice_panel.insert('end', document)
-        self.choice_panel.config(state=DISABLED)
+        def link_to_github_scroll_handler(event):
+            if self.choice_panel.vbar.get()[0] == 0.0:
+                self.link_to_github.place(anchor=N, relx=0.5, rely=0)
+            else:
+                self.link_to_github.place_forget()
+
+        ## 创建使用说明链接
+        self.link_to_github = Label(self.choice_panel, text="点此参阅使用说明", bg=self.background_color, fg='black')
+        self.link_to_github.bind("<Button-1>", lambda e: webbrowser.open_new_tab("https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction"))
+        self.link_to_github.place(anchor=N, relx=0.5, rely=0)
+
+        self.choice_panel.bind("<MouseWheel>", link_to_github_scroll_handler)
 
         ## 创建提示标签
         tips = []
@@ -214,11 +264,14 @@ class SpiderGUI(object):
         self.start_button_tip.bind_widget(self.start_button, balloonmsg="点此启动爬虫，下载选中书籍。")
         tips.append(self.start_button_tip)
         self.add_book_button_tip = Balloon(master=self.level_3_SE_frame)
-        self.add_book_button_tip.bind_widget(self.add_book_button, balloonmsg="点此将左侧【书名】及其对应【链接】加入可选爬取项目中。")
+        self.add_book_button_tip.bind_widget(self.add_book_button, balloonmsg="点此将左侧【书名】及其对应【链接】加入可选下载项目中。")
         tips.append( self.add_book_button_tip)
         self.save_info_list_button_tip = Balloon(master=self.level_3_NE_frame)
-        self.save_info_list_button_tip.bind_widget(self.save_info_list_button, balloonmsg="点此储存已添加的【书籍信息】，下次打开应用自动恢复。")
+        self.save_info_list_button_tip.bind_widget(self.save_info_list_button, balloonmsg="点此储存已添加的【书籍信息】，下次打开应用自动恢复。\n文件名为book_info，可在程序同目录下找到。")
         tips.append(self.save_info_list_button_tip)
+        self.open_save_path_button_tip = Balloon(master=self.level_3_NE_frame)
+        self.open_save_path_button_tip.bind_widget(self.open_save_path_button, balloonmsg="点此打开文件夹，查看已保存书籍。")
+        tips.append(self.open_save_path_button_tip)
         self.book_title_entry_tip = Balloon(master=self.level_4_input_frame)
         self.book_title_entry_tip.bind_widget(self.book_title_entry, balloonmsg="请在此输入书名")
         tips.append(self.book_title_entry_tip)
@@ -263,7 +316,7 @@ class SpiderGUI(object):
 
         ## 创建弹窗
         self.top = Toplevel(master=self.master, bg=top_background_color)
-        self.top.title('小说爬取进度')
+        self.top.title('小说下载进度')
         top_level_width = 500
         top_level_height = 200
         alignstr = f'{int(top_level_width)}x{int(top_level_height)}+{int((self.screenwidth - top_level_width) / 2)}+{int((self.screenheight - top_level_height) / 2)}'
@@ -286,7 +339,6 @@ class SpiderGUI(object):
 
         ## 关闭窗口时的动作
         def on_closing():
-            self.top.update()
             self.title_label.destroy()
             self.author_label.destroy()
             self.progress_bar.destroy()
@@ -305,10 +357,11 @@ class SpiderGUI(object):
             spider.crawl_novel()
             ## 爬取后取消勾选
             for choice_button in self.choice_buttons:
-                if choice_button.var.get() == True and self.book_info[choice_button.cget("text")] == url:
+                if self.book_info[choice_button.cget("text")] == url:
                     choice_button.deselect()
 
         on_closing()
+        self.about_software()
 
     ## 将书籍从输入框添加进缓存区
     def add_book(self):
@@ -349,10 +402,24 @@ class SpiderGUI(object):
         ## 禁止编辑缓存区
         self.choice_panel.config(state=DISABLED)
 
+
+    def load_info_list(self):
+        fin = open("book_info.html", 'r', encoding='UTF-8')
+        regx = re.compile('<li><a href="(?P<url>.*?)">(?P<title>.*?)</a></li>')
+        for line in fin.readlines():
+            info = regx.search(line)
+            if info != None:
+                self.book_info[info.group('title')] = info.group('url')
+        fin.close()
+
     ## 将缓存区书籍永久储存
     def save_info_list(self):
-        with open('book_info.pkl', 'wb') as fout:
-            pickle.dump(self.book_info, fout, pickle.HIGHEST_PROTOCOL)
+        fout = open("book_info.html", 'w', encoding='UTF-8')
+        fout.write(html_prefix)
+        for book_title in self.book_info:
+            fout.write(f'	    <li><a href="{self.book_info[book_title]}">{book_title}</a></li>\n')
+        fout.write(html_postfix)
+        fout.close()
 
     ## 打赏页面
     def about_software(self):
@@ -368,7 +435,7 @@ class SpiderGUI(object):
         top.iconbitmap(self.master_icon_path)
         alignstr = f'{int(top_level_width)}x{int(top_level_height)}+{int((self.screenwidth - top_level_width) / 2)}+{int((self.screenheight - top_level_height) / 2)}'
         top.geometry(alignstr)
-        top.grab_set()
+        top.grab_set()  # 置顶页面
         top.attributes('-alpha', 0.9)
         top.resizable(False, False)
         ## 创建二维码窗口
@@ -378,8 +445,11 @@ class SpiderGUI(object):
         qr_code_label = Label(master= top, image=qr_code, text="微信赞赏码", compound='bottom')
         qr_code_label.place(anchor=W, relx=0.1, rely=0.5)
         ## 创建文字窗口
-        text_label = Label(master=top, text="点都点了，打个赏呗~", font=top_label_font, bg='white')
+        text_label = Label(master=top, text="用都用了，打个赏呗~", font=top_label_font, bg='white')
         text_label.place(anchor=W, relx=0.5, rely=0.5)
+
+    def open_save_path(self):
+        os.startfile(os.getcwd()+os.sep+'fiction')
 
     ## 点击时清除书名栏说明文字
     def clear_book_title_entry_text(self, event):

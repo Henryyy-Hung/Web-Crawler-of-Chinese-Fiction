@@ -90,6 +90,9 @@ class NovelSpider(object):
         self.__start_time = time.time()
         self.__last_modify_time = time.time()
         self.__state = True
+        ## 保存路径
+        self.novel_path = os.getcwd() + os.sep + "fiction"
+        self.report_path = os.getcwd() + os.sep + "fiction_report"
         super().__init__()
 
     @property
@@ -204,7 +207,7 @@ class NovelSpider(object):
     @crawler_mode.setter
     def crawler_mode(self, value):
         if value == 'selenium':
-            self.speed_of_crawling = 0.7
+            self.speed_of_crawling = 0.5
         self.__crawler_mode = value
 
     @property
@@ -231,7 +234,7 @@ class NovelSpider(object):
                     ua = UserAgent(family='chrome')
                     res = ua.random()
                     headers = {"User-Agent": res}
-                    response = requests.get(url=url, headers=headers, timeout = 5)
+                    response = requests.get(url=url, headers=headers, timeout = 10)
                     response.encoding = self.encode
                     return response.text
                 except:
@@ -412,11 +415,14 @@ class NovelSpider(object):
             self.content[-1] = ChapterContent()
             self.content[-1].title = f'正文卷'
             self.content[-1].content = f''
+        ## 创建目录
+        if not os.path.exists(self.novel_path):
+            os.mkdir(self.novel_path)
+        if not os.path.exists(self.report_path):
+            os.mkdir(self.report_path)
         ## 打开小说文件和报告文件
-        novel_path = os.getcwd()
-        report_path = os.getcwd()
-        novel = open(f'{novel_path}{os.sep}{self.title_of_book}.txt', 'w', encoding=output_encoding)
-        report = open(f'{report_path}{os.sep}{self.title_of_book}_report.txt', 'w', encoding=output_encoding)
+        novel = open(f'{self.novel_path}{os.sep}{self.title_of_book}.txt', 'w', encoding=output_encoding)
+        report = open(f'{self.report_path}{os.sep}{self.title_of_book}_report.txt', 'w', encoding=output_encoding)
         ## 按照顺序写入小说章节和报告
         keys_of_chapters_of_book = sorted(self.content.keys())
         for key in keys_of_chapters_of_book:
@@ -439,7 +445,7 @@ class NovelSpider(object):
         report.close()
         ## 确认报告是否存在
         report_exist = True
-        with open(f'{report_path}{os.sep}{self.title_of_book}_report.txt', 'r', encoding=output_encoding) as fin:
+        with open(f'{self.report_path}{os.sep}{self.title_of_book}_report.txt', 'r', encoding=output_encoding) as fin:
             for line in fin:
                 if line != '\n':
                     break
@@ -447,7 +453,7 @@ class NovelSpider(object):
                 report_exist = False
         ## 若报告没有实质内容，则删除报告
         if report_exist == False:
-            os.remove(f'{report_path}{os.sep}{self.title_of_book}_report.txt')
+            os.remove(f'{self.report_path}{os.sep}{self.title_of_book}_report.txt')
 
     ## 整合所有函数，爬取小说
     def crawl_novel(self):
@@ -465,8 +471,8 @@ class NovelSpider(object):
         self.stop_chapter = len(self.url_of_chapters)
         self.total_chapter = self.stop_chapter - self.start_chapter
         ## 限制速度
-        if self.speed_of_crawling > 5:
-            self.__speed_of_crawling = 5
+        if self.speed_of_crawling > 10:
+            self.__speed_of_crawling = 10
         ## 定义访问率
         access_rate = 1 / self.speed_of_crawling
         ## 输出书籍信息到屏幕上
@@ -498,14 +504,14 @@ class NovelSpider(object):
         try:
             ## 保存文件
             self.save_novel()
-            time.sleep(1)
+            time.sleep(0.5)
             ## 生成提示
-            self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，已保存在当前工作目录。')
+            self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，TXT文件已保存。')
         except:
             ## 生成提示
-            self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，文件保存失败。')
+            self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，TXT文件保存失败。')
         finally:
-            time.sleep(1)
+            time.sleep(0.5)
 
     ## 预定义指定网站的参数
     def auto_setting(self, url):
