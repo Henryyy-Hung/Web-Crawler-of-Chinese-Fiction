@@ -2,7 +2,7 @@
 ## **基本资料**
 * 名称：【小说爬虫】
 * 版本：1.1
-* 功能：从网站下载网文，自动校对等。
+* 功能：从不提供下载的小说网站爬取TXT文档，自动校对等。
 * 下载：[**点此下载最新版**](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/exe/%E5%B0%8F%E8%AF%B4%E7%88%AC%E8%99%ABv1.1.exe?raw=true)
 * 教程：请参阅[**使用方法**](#使用方法)，跟着教程一步一步来
 
