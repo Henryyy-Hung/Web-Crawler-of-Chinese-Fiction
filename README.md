@@ -4,7 +4,7 @@
 * 版本：1.0
 * 功能：从网站下载网文，自动校对等。
 
-![未标题-2](https://user-images.githubusercontent.com/78750074/179153333-c544e2c9-b499-43d4-96a2-79edf1a1ee0c.jpg)
+<img src="https://user-images.githubusercontent.com/78750074/179153333-c544e2c9-b499-43d4-96a2-79edf1a1ee0c.jpg" alt="demo" style="width:400;height:300;" />
 
 ## **制作目的**
 * 下载只供阅读的网站中的TXT文本
