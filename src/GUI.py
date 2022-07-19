@@ -16,106 +16,103 @@ from tkinter.scrolledtext import ScrolledText
 
 html_prefix =\
 '''
-
 <!DOCTYPE HTML>
 <html>
 
   <head>
   
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/ >
-		
+        
     <title>我的书单</title>
-	
+    
     <base target="_blank"/>
-	
+    
     <!-- no link -->
-	
+    
     <meta name="author" content="小说爬虫" />
-	<meta name="generator" content="小说爬虫" />
-	<meta name="description" content="用户自定义的书单" />
-	<meta name="keywords" content="自定义书单,爬虫" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	
+    <meta name="generator" content="小说爬虫" />
+    <meta name="description" content="用户自定义的书单" />
+    <meta name="keywords" content="自定义书单,爬虫" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
     <!-- no script -->
-	
+    
     <style type="text/css" media="screen">
-	body {
-	background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
-	}
-	#header {
-	color:black;
-	text-align:center;
-	text-shadow: 2px 2px 2px #bbbbbb;
-	}
-	#section {
-	align:center;
-	}
-	#book_list {
-	display: table;
+    body {
+    background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
+    }
+    #header {
+    color:black;
+    text-align:center;
+    text-shadow: 2px 2px 2px #bbbbbb;
+    }
+    #section {
+    align:center;
+    }
+    #book_list {
+    display: table;
     margin: 0 auto;
-	font-size:x-large;
-	max-width: 16em;
-	}
-	#footer {
-	border-top: #bbbbbb solid 2px;
-	background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
-	color:black;
-	text-align:right;
+    font-size:x-large;
+    max-width: 16em;
+    }
+    #footer {
+    border-top: #bbbbbb solid 2px;
+    background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
+    color:black;
+    text-align:right;
     position:fixed;
     bottom:0em;
-	width:99%;
-	padding: 0.5em 0 0.5em 0;
-	}
-	a:link {
-	color: black;
-	background-color: transparent;
-	text-decoration: none;
-	}
-	a:visited {
-	color: black;
-	background-color: transparent;
-	text-decoration: none;
-	}
-	a:hover {
-	color: blue;
-	background-color: transparent;
-	text-decoration: none;
-	}
-	a:active {
-	color: blue;
-	background-color: transparent;
-	text-decoration: none;
-	}
-	</style>
-		
+    width:99%;
+    padding: 0.5em 0 0.5em 0;
+    }
+    a:link {
+    color: black;
+    background-color: transparent;
+    text-decoration: none;
+    }
+    a:visited {
+    color: black;
+    background-color: transparent;
+    text-decoration: none;
+    }
+    a:hover {
+    color: blue;
+    background-color: transparent;
+    text-decoration: none;
+    }
+    a:active {
+    color: blue;
+    background-color: transparent;
+    text-decoration: none;
+    }
+    </style>
+        
   </head>
-	
+    
   <body>
   
     <div id="header">
-	  <h1>我的书单</h1>
-	  <hr />
-	</div>
-	
-	<div id="section">
-	  <div id="book_list">
-	    <ol>
+      <h1>我的书单</h1>
+      <hr />
+    </div>
+    
+    <div id="section">
+      <div id="book_list">
+        <ol>
 '''
 
 html_postfix =\
-'''
-		</ol>
-		<br />
-	  </div>
-	</div>
+'''        </ol>
+        <br />
+      </div>
+    </div>
 
-	<div id="footer">
-	  <address>
-		软件主页:&nbsp;<a href="https://github.com/Henryyy-Hung/Web-Spider-of-Chinese-Fiction"><i>点此跳转</i></a>&nbsp;<br />
-	  </address>
-	</div>
-
-
+    <div id="footer">
+      <address>
+        软件主页:&nbsp;<a href="https://github.com/Henryyy-Hung/Web-Spider-of-Chinese-Fiction"><i>点此跳转</i></a>&nbsp;<br />
+      </address>
+    </div>
+    
   </body>
 
 </html>
@@ -417,7 +414,7 @@ class SpiderGUI(object):
         fout = open("book_info.html", 'w', encoding='UTF-8')
         fout.write(html_prefix)
         for book_title in self.book_info:
-            fout.write(f'	    <li><a href="{self.book_info[book_title]}">{book_title}</a></li>\n')
+            fout.write(f'        <li><a href="{self.book_info[book_title]}">{book_title}</a></li>\n')
         fout.write(html_postfix)
         fout.close()
 
