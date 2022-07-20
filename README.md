@@ -37,7 +37,7 @@
 -----|----|-------|----|----
 31小说网|https://www.31xs.net|73000|更新快，质量高| 繁忙时段用不了
 UU看书|https://www.uuks.org|65000|质量高|暂未发现
-飘天文学|https://www.ptwxz.com|8800|质量高|书籍少
+飘天文学|https://www.ptwxz.com|8800|质量高|书籍少，有屏蔽字
 笔趣阁|http://www.bqxs520.com|无法统计|章节全|质量低，或有广告
 笔趣阁|https://www.ibiquge.net|无法统计|书籍特别多|质量低，或有广告
 
