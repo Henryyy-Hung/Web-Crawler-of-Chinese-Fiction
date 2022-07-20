@@ -40,7 +40,7 @@ UU看书|https://www.uuks.org|65000|质量高|暂未发现|
 飘天文学|https://www.ptwxz.com|8800|质量高|书籍少|
 笔趣阁|http://www.bqxs520.com|无法统计|章节全|质量低，或有广告|
 笔趣阁|https://www.ibiquge.net|无法统计|书籍特别多|质量低，或有广告|
-疯情书屋|https://aabook.xyz/|4000|小黄文你懂的|速度慢15倍|需要自行安装chormdriver
+疯情书屋|https://aabook.xyz/|4000|小黄文你懂的|速度慢15倍|需要安装chormdriver方可使用
 
 ## **更新计划**
 - [X] 添加只爬取最近100章按钮，避免浪费时间空间以及对网站造成负荷。`v1.0 已更新`
