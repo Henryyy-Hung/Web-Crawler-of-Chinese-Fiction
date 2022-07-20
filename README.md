@@ -38,9 +38,9 @@
     * 优点：质量高
 3. 飘天文学：https://www.ptwxz.com `8800本书`
     * 优点：质量高。缺点：书籍少
-4. 笔趣阁：http://www.bqxs520.com `未统计`
+4. 笔趣阁：http://www.bqxs520.com `无法统计`
     * 优点：章节全。缺点：质量低
-5. 笔趣阁：https://www.ibiquge.net `未统计`
+5. 笔趣阁：https://www.ibiquge.net `无法统计`
     * 优点：书籍特别多。缺点：质量低
 
 ## **更新计划**
