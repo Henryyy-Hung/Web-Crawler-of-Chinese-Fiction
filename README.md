@@ -1,9 +1,9 @@
 
 ## **基本资料**
 * 名称：【小说爬虫】
-* 版本：1.1.0
+* 版本：1.1.0 [**点此下载最新版**](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/exe/%E5%B0%8F%E8%AF%B4%E7%88%AC%E8%99%ABv1.1.exe?raw=true)。
+* 要求：windows 10 或 以上
 * 功能：从小说网站抓取小说内容，排版并保存为TXT文档。
-* 下载：[**点此下载最新版**](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/exe/%E5%B0%8F%E8%AF%B4%E7%88%AC%E8%99%ABv1.1.exe?raw=true)。
 * 教程：[**点此查看使用方法**](#使用方法)，请务必跟着教程一步一步来。
 * 备注：本软件免费且无毒。若出现任何问题，一是没按操作来，二是用了【[**支援的网站**](#支援的网站 "Goto 支援的网站")】以外的网站，三是在繁忙时间使用，网站伺服器处理不过来。[点此查看源代码](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/tree/main/src)。
 
