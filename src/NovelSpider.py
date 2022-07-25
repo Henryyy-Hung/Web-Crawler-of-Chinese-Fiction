@@ -5,7 +5,6 @@ import time
 import requests
 import threading
 import WordProcessingTools
-from GUI import SpiderGUI
 from selenium import webdriver
 from my_fake_useragent import UserAgent
 
@@ -66,9 +65,9 @@ class ChapterContent(object):
             self.__word_count += WordProcessingTools.word_count_of_chin_char(self.content)
 
 class NovelSpider(object):
-    def __init__(self, spider):
+    def __init__(self, spiderGUI=None):
         ## 和图形界面建立链接
-        self.__GUI = spider
+        self.__GUI = spiderGUI
         ## 需要的信息
         self.__url_of_book = r''
         self.__base_url = r''
@@ -207,7 +206,8 @@ class NovelSpider(object):
     @crawler_mode.setter
     def crawler_mode(self, value):
         if value == 'selenium':
-            self.speed_of_crawling = 0.5
+            if self.speed_of_crawling > 3:
+                self.speed_of_crawling = 3
         self.__crawler_mode = value
 
     @property
@@ -227,8 +227,8 @@ class NovelSpider(object):
 
     ## 从网页取得响应，request为快速方法，selenium为慢速方法
     def get_response(self, url):
+        response = None
         if self.crawler_mode == 'requests':
-            response = None
             for i in range(5):
                 try:
                     ua = UserAgent(family='chrome')
@@ -239,25 +239,29 @@ class NovelSpider(object):
                     return response.text
                 except:
                     continue
-            return response
         elif self.crawler_mode == 'selenium':
-            option = webdriver.ChromeOptions()
-            option.add_argument('headless')
-            option.add_argument("--window-size=1920,1080")
-            option.add_argument("--disable-extensions")
-            option.add_argument("--disable-gpu")
-            option.add_argument("--disable-software-rasterizer")
-            option.add_argument('--no-sandbox')
-            option.add_argument('--ignore-certificate-errors')
-            option.add_argument('--allow-running-insecure-content')
-            option.add_argument("blink-settings=imagesEnabled=false")
-            browser = webdriver.Chrome(options=option)
-            browser.get(url)
-            time.sleep(2)
-            response = browser.page_source.__str__()
-            browser.delete_all_cookies()
-            browser.quit()
-            return response
+            for i in range(5):
+                try:
+                    option = webdriver.ChromeOptions()
+                    option.add_argument('headless')
+                    option.add_argument("--window-size=1920,1080")
+                    option.add_argument("--disable-extensions")
+                    option.add_argument("--disable-gpu")
+                    option.add_argument("--disable-software-rasterizer")
+                    option.add_argument('--no-sandbox')
+                    option.add_argument('--ignore-certificate-errors')
+                    option.add_argument('--allow-running-insecure-content')
+                    option.add_argument("blink-settings=imagesEnabled=false")
+                    browser = webdriver.Chrome(options=option)
+                    browser.get(url)
+                    time.sleep(3)
+                    response = browser.page_source.__str__()
+                    browser.delete_all_cookies()
+                    browser.quit()
+                    return response
+                except:
+                    continue
+        return response
 
     ## 渐进式缩小范围提取所需内容
     @staticmethod
@@ -272,17 +276,21 @@ class NovelSpider(object):
             next_cycle.clear()
         return current_cycle
 
-    ## 输出栏
+    ## 输出栏 和GUI的唯一接口
     def msgbox(self, target, value):
-        if target == 'progress_bar':
-            self.__GUI.progress_bar['value'] = value
-        elif target == 'title_label':
-            self.__GUI.title_label['text'] = value
-        elif target == 'author_label':
-            self.__GUI.author_label['text'] = value
-        elif target == 'notice_label':
-            self.__GUI.notice_label['text'] = value
-        self.__GUI.top.update()
+        if self.state == True:
+            try:
+                if target == 'progress_bar':
+                    self.__GUI.progress_bar['value'] = value
+                elif target == 'title_label':
+                    self.__GUI.title_label['text'] = value
+                elif target == 'author_label':
+                    self.__GUI.author_label['text'] = value
+                elif target == 'notice_label':
+                    self.__GUI.notice_label['text'] = value
+                self.__GUI.top.update()
+            except :
+                self.state = False
 
     ## 状态条
     def status_bar(self):
@@ -291,11 +299,11 @@ class NovelSpider(object):
         total_num_of_keys = self.num_of_chapters_wanted if self.num_of_chapters_wanted > 0 else len(self.url_of_chapters)
         progress = current_num_of_keys / total_num_of_keys if total_num_of_keys > 0 else 0
         ## 获取已用时间
-        time_used = time.time() - self.__start_time
+        time_used = int(time.time() - self.__start_time)
         minutes_used = time_used // 60
         seconds_used = time_used % 60
         ## 获取逾期时间
-        expected_time_used = (1 / progress) * time_used if progress > 0 else 0
+        expected_time_used = int((1 / progress) * time_used) if progress > 0 else 0
         expected_minutes_used = expected_time_used // 60
         expected_seconds_used = expected_time_used % 60
         ## 输出当前【爬虫进度】【耗时】【预计耗时】
@@ -318,6 +326,11 @@ class NovelSpider(object):
         try:
             response =self.get_response(chapter_content.url)
         except:
+            chapter_content.title = chapter_content.report_title = f'内容访问失败'
+            chapter_content.content = chapter_content.report_content = f'链接：{chapter_content.url}'
+            chapter_content.ready = True
+            return False
+        if response == None:
             chapter_content.title = chapter_content.report_title = f'内容访问失败'
             chapter_content.content = chapter_content.report_content = f'链接：{chapter_content.url}'
             chapter_content.ready = True
@@ -480,6 +493,10 @@ class NovelSpider(object):
         self.msgbox(target='author_label', value=f'作者：{self.author_of_book}')
         ## 多线程爬取章节
         for idx in range(self.start_chapter, self.stop_chapter):
+            ## 进行判定，是否终止程序
+            if self.state == False:
+                return False
+            ## 显示进度条
             self.status_bar()
             url_of_chapter = self.url_of_chapters[idx]
             self.content[idx] = ChapterContent(url=url_of_chapter)
@@ -497,6 +514,9 @@ class NovelSpider(object):
                 time.sleep(access_rate)
         ## 等待线程执行完毕
         while len(self) < self.total_chapter and time.time() - self.__last_modify_time < 60:
+            ## 进行判定，是否终止程序
+            if self.state == False:
+                return False
             time.sleep(0.1)
             self.status_bar()
         self.status_bar()
@@ -512,6 +532,7 @@ class NovelSpider(object):
             self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，TXT文件保存失败。')
         finally:
             time.sleep(0.5)
+        return True
 
     ## 预定义指定网站的参数
     def auto_setting(self, url):
@@ -525,7 +546,7 @@ class NovelSpider(object):
             self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<h1 class="chapter_title">(.*?)</h1>']
             self.regx_of_chap_content = [r'<div class="chapter_con" id="chapter_content">(.*?)</div>',r'<p>(.*?)</p>']
-            self.speed_of_crawling = 1
+            self.speed_of_crawling = 0.6
             self.crawler_mode = 'selenium'
         elif r'www.31xs.net' in url:
             self.url_of_book = url
@@ -612,3 +633,21 @@ class NovelSpider(object):
         self.content[0].title = f'网页响应'
         self.content[0].content = self.get_response(url)
         self.save_novel()
+
+    def get_page(self, url):
+        self.content[0] = ChapterContent()
+        self.content[0].url = url
+        self.auto_setting(url)
+        self.start_chapter = 0
+        self.crawl_chapter_page(self.content[0])
+        self.novel_path = os.getcwd() + os.sep + "fiction_report"
+        self.save_novel()
+
+
+if __name__ == "__main__":
+    url = input("url: ")
+    print("start crawling")
+    NovelSpider().get_page(url)
+
+
+

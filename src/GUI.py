@@ -5,6 +5,7 @@ import sys
 import time
 import webbrowser
 import NovelSpider
+import threading
 from tkinter import *
 from tkinter import ttk
 from tkinter.tix import *
@@ -40,6 +41,8 @@ html_prefix =\
     <style type="text/css" media="screen">
     body {
     background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
+    background-size: 234px 234px;
+    background-attachment: fixed;
     }
     #header {
     color:black;
@@ -187,7 +190,7 @@ class SpiderGUI(object):
 
         ## 创建按钮
         ## 爬虫启动按钮
-        self.start_button = Button(master=self.level_1_S_frame, text="开始下载", command=self.release_spider, font=self.button_font, bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
+        self.start_button = Button(master=self.level_1_S_frame, text="开始下载", command=self.start_crawling, font=self.button_font, bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
         self.start_button.place(anchor=CENTER, relx=0.5, rely=0.5, relwidth=0.4, relheight=0.6)
         ## 添加书籍资料按钮
         self.add_book_button = Button(master=self.level_3_SE_frame, text="添加数据", command=self.add_book, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
@@ -242,17 +245,16 @@ class SpiderGUI(object):
         for book_name in sorted(self.book_info.keys(), key=self.to_pinyin, reverse=True):
             self.create_choice_button(book_title=book_name)
 
+
         def link_to_github_scroll_handler(event):
             if self.choice_panel.vbar.get()[0] == 0.0:
                 self.link_to_github.place(anchor=N, relx=0.5, rely=0)
             else:
                 self.link_to_github.place_forget()
-
         ## 创建使用说明链接
         self.link_to_github = Label(self.choice_panel, text="点此参阅使用说明", bg=self.background_color, fg='black')
         self.link_to_github.bind("<Button-1>", lambda e: webbrowser.open_new_tab("https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction"))
         self.link_to_github.place(anchor=N, relx=0.5, rely=0)
-
         self.choice_panel.bind("<MouseWheel>", link_to_github_scroll_handler)
 
         ## 创建提示标签
@@ -284,6 +286,10 @@ class SpiderGUI(object):
         ## 开始循环显示
         mainloop()
 
+    ## 添加多线程，防止阻塞mainloop()
+    def start_crawling(self):
+        thread = threading.Thread(target=self.release_spider, args=())
+        thread.start()
 
     ## 释放爬虫
     def release_spider(self):
@@ -307,6 +313,7 @@ class SpiderGUI(object):
         top_background_color = 'white'
         top_forebackground_color = 'black'
         top_label_font = tkFont.Font(size=16, weight='bold')
+        ## 定义进度条变量
         style = ttk.Style()
         style.theme_use('alt')
         style.configure("blue.Horizontal.TProgressbar", foreground='#b6cbde', background='#b6cbde')
@@ -321,7 +328,8 @@ class SpiderGUI(object):
         self.top.iconbitmap(self.master_icon_path)
         self.top.attributes('-alpha', 0.9)
         self.top.resizable(False, False)
-        self.top.wm_transient(self.master)
+        ## self.top.grab_set()  # 置顶页面
+        ## self.top.wm_transient(self.master) ## 始终置顶
 
         ## 创建标签
         self.title_label = Label(master=self.top, text="书名：等待响应中...", bg=top_background_color, fg=top_forebackground_color, font=top_label_font, anchor=W)
@@ -347,17 +355,26 @@ class SpiderGUI(object):
 
         ## 开始爬取书籍
         for url in urls:
+            ## 每当上一次爬取结束，刷新页面信息
+            self.title_label['text'] = "书名：等待响应中..."
+            self.author_label['text'] = "作者：等待响应中..."
+            self.progress_bar['value'] = 0
+            self.notice_label['text'] = "提示：等待响应中..."
+            ## 创建爬虫
             spider = NovelSpider.NovelSpider(self)
             spider.url_of_book = url
+            ## 启动只爬取最后一百章
             if self.latest_chapter_only_check_button.var.get() == True:
                 spider.num_of_chapters_wanted = 100
+            #3 启动爬虫
             spider.crawl_novel()
             ## 爬取后取消勾选
             for choice_button in self.choice_buttons:
                 if self.book_info[choice_button.cget("text")] == url:
                     choice_button.deselect()
-
+        ## 关闭程序
         on_closing()
+        ## 显示弹窗
         self.about_software()
 
     ## 将书籍从输入框添加进缓存区
