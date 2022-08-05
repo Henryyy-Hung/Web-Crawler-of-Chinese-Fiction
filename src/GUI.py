@@ -17,17 +17,18 @@ from tkinter.scrolledtext import ScrolledText
 
 html_prefix =\
 '''
+
 <!DOCTYPE HTML>
 <html>
 
   <head>
-  
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/ >
-        
+
+    <meta charset="utf-8" / >
+    
     <title>我的书单</title>
     
-    <base target="_blank"/>
-    
+    <base target="_blank" />
+
     <!-- no link -->
     
     <meta name="author" content="小说爬虫" />
@@ -39,81 +40,131 @@ html_prefix =\
     <!-- no script -->
     
     <style type="text/css" media="screen">
+    
     body {
-    background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
-    background-size: 234px 234px;
-    background-attachment: fixed;
+      background: url(https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/src/img/wood.jpg?raw=true) left top repeat;
+	  background-color: rgb(231, 212, 182);
+      background-attachment: fixed;	  
+      box-sizing: border-box;
     }
+    
+    #container {
+      max-width: 70%;
+      margin: 50px 0px;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 30px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0px 0px 15px black;
+      padding: 30px;
+    }
+    
     #header {
-    color:black;
-    text-align:center;
-    text-shadow: 2px 2px 2px #bbbbbb;
+      color:black;
+      text-align:center;
+      font-size: 2em;
+	  font-weight: 600;
     }
-    #section {
-    align:center;
-    }
+    
     #book_list {
-    display: table;
-    margin: 0 auto;
-    font-size:x-large;
-    max-width: 16em;
+	  margin: 2em auto;
     }
+    
+    dl {
+      list-style-type:none;
+      counter-reset: list_num;
+      text-align: justify;
+      text-align-last: justify;
+    }
+    
+    dt {
+      display: inline-block;
+	  text-align: left;
+      text-align-last: left;
+	  vertical-align: top;
+    }
+    
+    dt>a::before {
+      counter-increment: list_num;
+      content: counter(list_num) ". ";
+    }
+    
+    dt>a {
+      display: inline-block;
+      border-radius: 10px;
+      padding: 10px;
+      width: 15em;
+	  white-space: normal;
+      text-overflow:ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    
+    dt>a:link, dt>a:visited, dt>a:active, dt>a:hover {
+      color: black;
+      background-color: transparent;
+      text-decoration: none;
+    }
+    
+    dt>a:hover {
+      background-color: rgba(255,255,255,0.5);
+	  white-space: normal;
+    }
+    
+    dt>a:active {
+      background-color: rgba(255,255,255,0.8);
+    }
+    
     #footer {
-    border-top: #bbbbbb solid 2px;
-    background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
-    color:black;
-    text-align:right;
-    position:fixed;
-    bottom:0em;
-    width:99%;
-    padding: 0.5em 0 0.5em 0;
+      text-align: center;
+      color: red;
     }
-    a:link {
-    color: black;
-    background-color: transparent;
-    text-decoration: none;
+	
+	address>a:link, address>a:visited, address>a:active, address>a:hover {
+	  animation-name: shift_color;
+      animation-duration: 0.2s;
+	  animation-iteration-count: infinite;
+	  animation-direction: alternate;
+	}
+	
+	@keyframes shift_color {
+	  from  {color: black;}
+	  to  {color: blue;}
     }
-    a:visited {
-    color: black;
-    background-color: transparent;
-    text-decoration: none;
-    }
-    a:hover {
-    color: blue;
-    background-color: transparent;
-    text-decoration: none;
-    }
-    a:active {
-    color: blue;
-    background-color: transparent;
-    text-decoration: none;
-    }
+	
+	
+    
     </style>
         
   </head>
     
   <body>
   
-    <div id="header">
-      <h1>我的书单</h1>
-      <hr />
-    </div>
+    <div id="container">
     
-    <div id="section">
+      <div id="header">
+          我的书单
+      </div>
+	  
+      <hr />
+	        
       <div id="book_list">
-        <ol>
+        <dl>
 '''
 
 html_postfix =\
-'''        </ol>
-        <br />
+'''
+        </dl>
       </div>
-    </div>
-
-    <div id="footer">
-      <address>
-        软件主页:&nbsp;<a href="https://github.com/Henryyy-Hung/Web-Spider-of-Chinese-Fiction"><i>点此跳转</i></a>&nbsp;<br />
-      </address>
+	  
+      <hr />
+      
+      <div id="footer">
+          <address> 
+            <a href="https://github.com/Henryyy-Hung/Web-Spider-of-Chinese-Fiction" id="source">点此跳转至软件主页</a>
+          </address>
+      </div>
+    
     </div>
     
   </body>
@@ -135,7 +186,7 @@ class SpiderGUI(object):
 
         ## 预定义主窗口变量
         self.background_color = '#bdc0c8'
-        self.master_frame_title = '小说爬虫  v1.1'
+        self.master_frame_title = '小说爬虫  v1.1.2'
         self.master_frame_width = 600
         self.master_frame_height = 450
         self.master_icon_path = self.get_resource_path(f'{"img"}{os.sep}{"icon.ico"}') #f'{os.getcwd()}{os.sep}{"img"}{os.sep}{"icon.ico"}'
@@ -419,7 +470,7 @@ class SpiderGUI(object):
 
     def load_info_list(self):
         fin = open("book_info.html", 'r', encoding='UTF-8')
-        regx = re.compile('<li><a href="(?P<url>.*?)">(?P<title>.*?)</a></li>')
+        regx = re.compile('<dt><a href="(?P<url>.*?)">(?P<title>.*?)</a></dt>')
         for line in fin.readlines():
             info = regx.search(line)
             if info != None:
@@ -431,7 +482,7 @@ class SpiderGUI(object):
         fout = open("book_info.html", 'w', encoding='UTF-8')
         fout.write(html_prefix)
         for book_title in self.book_info:
-            fout.write(f'        <li><a href="{self.book_info[book_title]}">{book_title}</a></li>\n')
+            fout.write(f'          <dt><a href="{self.book_info[book_title]}">{book_title}</a></dt>\n')
         fout.write(html_postfix)
         fout.close()
 
@@ -463,7 +514,10 @@ class SpiderGUI(object):
         text_label.place(anchor=W, relx=0.5, rely=0.5)
 
     def open_save_path(self):
-        os.startfile(os.getcwd()+os.sep+'fiction')
+        self.novel_path = os.getcwd()+os.sep+'fiction'
+        if not os.path.exists(self.novel_path):
+            os.mkdir(self.novel_path)
+        os.startfile(self.novel_path)
 
     ## 点击时清除书名栏说明文字
     def clear_book_title_entry_text(self, event):

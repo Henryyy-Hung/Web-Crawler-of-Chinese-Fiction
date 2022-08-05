@@ -205,9 +205,11 @@ class NovelSpider(object):
         return self.__crawler_mode
     @crawler_mode.setter
     def crawler_mode(self, value):
+        '''
         if value == 'selenium':
             if self.speed_of_crawling > 3:
                 self.speed_of_crawling = 3
+        '''
         self.__crawler_mode = value
 
     @property
@@ -418,7 +420,7 @@ class NovelSpider(object):
         ## 章节：书籍信息
         self.content[-3] = ChapterContent()
         self.content[-3].title = f'书籍信息'
-        self.content[-3].content = f'　　书名：{self.title_of_book} \n　　作者：{self.author_of_book} \n　　字数：{word_count_of_book / 10000:.1f}万 \n　　校对：小说爬虫 v1.0 \n'
+        self.content[-3].content = f'　　书名：{self.title_of_book} \n　　作者：{self.author_of_book} \n　　字数：{word_count_of_book / 10000:.1f}万 \n　　校对：小说爬虫 \n'
         ## 章节：免责声明
         self.content[-2] = ChapterContent()
         self.content[-2].title = f'声明'
@@ -433,6 +435,25 @@ class NovelSpider(object):
             os.mkdir(self.novel_path)
         if not os.path.exists(self.report_path):
             os.mkdir(self.report_path)
+
+        ## 爬取疯情书屋时进行分流 <--与主代码无关，作者个人使用-->
+        if self.base_url == r'https://aabook.xyz/':
+            file_path = os.sep
+            if word_count_of_book <= 30000:
+                file_path += "0. 短篇小说　　(0-3万)"
+            elif word_count_of_book <= 100000:
+                file_path += "1. 中篇小说　　(3-10万)"
+            elif word_count_of_book <= 300000:
+                file_path += "2. 小长篇小说　(10-30万)"
+            elif word_count_of_book <= 1000000:
+                file_path += "3. 中长篇小说　(30-100万)"
+            else:
+                file_path += "4. 大长篇小说　(100+万)"
+            new_path = self.novel_path + file_path
+            if not os.path.exists(new_path):
+                os.mkdir(new_path)
+            self.novel_path = new_path
+
         ## 打开小说文件和报告文件
         novel = open(f'{self.novel_path}{os.sep}{self.title_of_book}.txt', 'w', encoding=output_encoding)
         report = open(f'{self.report_path}{os.sep}{self.title_of_book}_report.txt', 'w', encoding=output_encoding)
@@ -485,7 +506,7 @@ class NovelSpider(object):
         self.total_chapter = self.stop_chapter - self.start_chapter
         ## 限制速度
         if self.speed_of_crawling > 10:
-            self.__speed_of_crawling = 10
+             self.__speed_of_crawling = 10
         ## 定义访问率
         access_rate = 1 / self.speed_of_crawling
         ## 输出书籍信息到屏幕上
@@ -546,9 +567,10 @@ class NovelSpider(object):
             self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<h1 class="chapter_title">(.*?)</h1>']
             self.regx_of_chap_content = [r'<div class="chapter_con" id="chapter_content">(.*?)</div>',r'<p>(.*?)</p>']
-            self.speed_of_crawling = 0.6
+            self.speed_of_crawling = 0.5
             self.crawler_mode = 'selenium'
-        elif r'www.31xs.net' in url:
+        elif r'www.31xs.net' in url or r'www.31xs.com' in url:
+            url = url.replace(r'www.31xs.com', r'www.31xs.net')
             self.url_of_book = url
             self.base_url = r'https://www.31xs.net'
             self.encode = r'UTF-8'
@@ -601,7 +623,7 @@ class NovelSpider(object):
             self.base_url = r'https://www.ibiquge.net'
             self.encode = r'UTF-8'
             self.regx_of_book_title = [r'<h1>(.*?)</h1>']
-            self.regx_of_book_author = [r'<p>作.*者：.*?<a href=".*?">(.*?)</a>.*?</p>']
+            self.regx_of_book_author = [r'<p>作.*?者：.*?<a href=".*?">(.*?)</a>.*?</p>']
             self.regx_of_chap_href = [r'<dd> <a style="" href="(.*?)">']
             self.key_of_content = {'start': 12, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<h1>(.*?)</h1>']

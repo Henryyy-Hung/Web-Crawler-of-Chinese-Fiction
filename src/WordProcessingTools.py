@@ -16,7 +16,7 @@ def process_paragraph(string):
     ## 将html语言翻译成人类语言
     string = html.unescape(string)
     ## 清除剩余html元素
-    string = re.sub(pattern=r'<.*>.*<.*>;', repl="", string=string, flags=re.DOTALL)
+    string = re.sub(pattern=r'<.*?>.*？<.*?>;', repl="", string=string, flags=re.DOTALL)
     ## 翻译剩余html语言
     translate = {'<br>':'\n', '<br/>':'\n', '<br />':'\n', '<p>':'', '<p/>':'\n', ' ':' '}
     for key in translate.keys():
@@ -35,7 +35,7 @@ def process_line(line, title_of_chapter = "No_Such_title"):
     if len(line) == 0:
         return ""
     ## 清除剩余html元素
-    line = re.sub(pattern='<.*>.*?</.*>', repl='', string=line)
+    line = re.sub(pattern='<.*?>.*?</.*?>', repl='', string=line)
     ## 删除行首缩进
     while len(line) != 0 and line[0] in [" ", "　", "　", '\t', '\n', '\r']:
         line = line[1:]
