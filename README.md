@@ -5,7 +5,7 @@
 * 要求：Win 10 或以上
 * 功能：从小说网站抓取小说内容，排版并保存为TXT文档。
 * 教程：[**点此查看使用方法**](#使用方法)，请务必跟着教程一步一步来。
-* 备注：本软件免费且无毒。若出现任何问题，一是没按操作来，二是用了【[**支援的网站**](#支援的网站 "Goto 支援的网站")】以外的网站，三是在繁忙时间使用，网站伺服器处理不过来。[点此查看源代码](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/tree/main/src)。
+* 备注：本软件免费且无毒。若出现任何问题，一是没按操作来，二是用了【[**支援的网站**](#支援的网站 "Goto 支援的网站")】以外的网站，三是在繁忙时间使用，网站伺服器处理不过来。[点此查看源代码](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/tree/main/src)。如有任何问题，请用我主页上的email联络我。
 
 ## **预览图片**
 <img src="https://user-images.githubusercontent.com/78750074/179153333-c544e2c9-b499-43d4-96a2-79edf1a1ee0c.jpg" alt="demo" width="640" height="320" />
