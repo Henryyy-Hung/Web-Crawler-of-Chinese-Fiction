@@ -60,7 +60,7 @@ def process_line(line, title_of_chapter = "No_Such_title"):
     for unwanted_word in unwanted_words:
         line = line.replace(unwanted_word, "")
     ## 替换关键词
-    replace_words = {"…": "...", "|": "", "《》": "", ".asxs.": "**", "...。": "...", "…。": "…", "赤果": "赤裸", "ꓹ ": "，"}
+    replace_words = {"…": "...", "┅": "...", "|": "", "《》": "", ".asxs.": "**", "...。": "...", "…。": "…", "赤果": "赤裸", "ꓹ ": "，"}
     for replaced_word in replace_words.keys():
         line = line.replace(replaced_word, replace_words[replaced_word])
     ## 避免重复标题

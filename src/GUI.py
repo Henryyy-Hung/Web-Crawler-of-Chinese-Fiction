@@ -250,8 +250,8 @@ class SpiderGUI(object):
         self.select_all_button = Button(master=self.level_3_NE_frame, text="全选书单", command=self.select_all, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
         self.select_all_button.place(anchor=CENTER, relx=0.5, rely=0.1, relwidth=0.9, relheight=0.125)
         ## 全不选表单按钮
-        self.cancel_select_all_button = Button(master=self.level_3_NE_frame, text="取消全选", command=self.cancel_select_all, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
-        self.cancel_select_all_button.place(anchor=CENTER, relx=0.5, rely=0.3, relwidth=0.9, relheight=0.125)
+        self.reverse_selected_button = Button(master=self.level_3_NE_frame, text="反向选择", command=self.reverse_selected, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
+        self.reverse_selected_button.place(anchor=CENTER, relx=0.5, rely=0.3, relwidth=0.9, relheight=0.125)
         ## 删除选中表单按钮
         self.delete_selected_button = Button(master=self.level_3_NE_frame, text="删除已选", command=self.delete_selected, font=self.button_font,bg=self.button_background_color, fg=self.button_foreground_color, activebackground=self.button_activebackground_color, activeforeground=self.button_activeforeground_color, borderwidth=self.button_border_width)
         self.delete_selected_button.place(anchor=CENTER, relx=0.5, rely=0.5, relwidth=0.9, relheight=0.125)
@@ -313,9 +313,27 @@ class SpiderGUI(object):
         self.start_button_tip = Balloon(master=self.level_1_S_frame)
         self.start_button_tip.bind_widget(self.start_button, balloonmsg="点此启动爬虫，下载选中书籍。")
         tips.append(self.start_button_tip)
+
+        self.start_button_tip = Balloon(master=self.level_1_S_frame)
+        self.start_button_tip.bind_widget(self.latest_chapter_only_check_button, balloonmsg="勾选此处后，仅下载所选中书籍最新的100章。")
+        tips.append(self.start_button_tip)
+
         self.add_book_button_tip = Balloon(master=self.level_3_SE_frame)
-        self.add_book_button_tip.bind_widget(self.add_book_button, balloonmsg="点此将左侧【书名】及其对应【链接】加入可选下载项目中。")
+        self.add_book_button_tip.bind_widget(self.add_book_button, balloonmsg="点此将左侧【书名】及其对应【链接】加入可选下载项目。")
         tips.append( self.add_book_button_tip)
+
+        self.save_info_list_button_tip = Balloon(master=self.level_3_NE_frame)
+        self.save_info_list_button_tip.bind_widget(self.select_all_button, balloonmsg="选中左侧所有项目。")
+        tips.append(self.save_info_list_button_tip)
+
+        self.save_info_list_button_tip = Balloon(master=self.level_3_NE_frame)
+        self.save_info_list_button_tip.bind_widget(self.reverse_selected_button, balloonmsg="取消左侧所有选中项目，选中左侧所有取消项目。")
+        tips.append(self.save_info_list_button_tip)
+
+        self.save_info_list_button_tip = Balloon(master=self.level_3_NE_frame)
+        self.save_info_list_button_tip.bind_widget(self.delete_selected_button, balloonmsg="从左侧区域删除所有选中项目。")
+        tips.append(self.save_info_list_button_tip)
+
         self.save_info_list_button_tip = Balloon(master=self.level_3_NE_frame)
         self.save_info_list_button_tip.bind_widget(self.save_info_list_button, balloonmsg="点此储存已添加的【书籍信息】，下次打开应用自动恢复。\n文件名为book_info，可在程序同目录下找到。")
         tips.append(self.save_info_list_button_tip)
@@ -353,12 +371,17 @@ class SpiderGUI(object):
         ## 如果没有链接，禁止启动爬虫
         if urls == []:
             return None
+
         ## 禁止同时启动第二只爬虫
         self.start_button['state'] = DISABLED
         self.latest_chapter_only_check_button['state'] = DISABLED
 
         ## 翻转顺序，先进先出
-        urls = reversed(urls)
+        urls = list(reversed(urls))
+        ## 记录待下载书籍总量
+        num_of_books = len(urls)
+        ## 记录已下载书籍总量
+        self.num_of_books_downloaded = 0
 
         ## 预定义定义弹窗变量
         top_background_color = 'white'
@@ -367,7 +390,8 @@ class SpiderGUI(object):
         ## 定义进度条变量
         style = ttk.Style()
         style.theme_use('alt')
-        style.configure("blue.Horizontal.TProgressbar", foreground='#b6cbde', background='#b6cbde')
+        style.configure("blue.Horizontal.TProgressbar", foreground='#5a768c', background='#5a768c')
+        style.configure("red.Horizontal.TProgressbar", foreground='#958268', background='#958268')
 
         ## 创建弹窗
         self.top = Toplevel(master=self.master, bg=top_background_color)
@@ -380,7 +404,7 @@ class SpiderGUI(object):
         self.top.attributes('-alpha', 0.9)
         self.top.resizable(False, False)
         ## self.top.grab_set()  # 置顶页面
-        ## self.top.wm_transient(self.master) ## 始终置顶
+        self.top.wm_transient(self.master) ## 始终置顶
 
         ## 创建标签
         self.title_label = Label(master=self.top, text="书名：等待响应中...", bg=top_background_color, fg=top_forebackground_color, font=top_label_font, anchor=W)
@@ -390,22 +414,42 @@ class SpiderGUI(object):
         self.notice_label =  Label(master=self.top, text="提示：等待响应中...", bg=top_background_color, fg=top_forebackground_color, anchor=W)
         self.notice_label.place(anchor=CENTER, relx=0.5, rely=0.9, relwidth=0.9, relheight=0.15)
         ## 创建进度条
-        self.progress_bar = ttk.Progressbar(master=self.top, maximum=10000, value=0, style="red.Horizontal.TProgressbar")
+        self.progress_bar = ttk.Progressbar(master=self.top, maximum=10000, value=0, style="blue.Horizontal.TProgressbar")
         self.progress_bar.place(anchor=CENTER, relx=0.5, rely=0.65, relwidth=0.9, relheight=0.2)
 
         ## 关闭窗口时的动作
         def on_closing():
+            ## 更新时间戳，使在该时间戳之前创建的爬虫无法向GUI传递信息，以及时间戳之前创建的爬虫释放for循环停止
+            self.start_time_ns = time.time_ns()
+            ## 摧毁所有弹窗组件
             self.title_label.destroy()
             self.author_label.destroy()
             self.progress_bar.destroy()
             self.notice_label.destroy()
             self.top.destroy()
+            ## 重新允许用户进行操作
             self.start_button['state'] = ACTIVE
             self.latest_chapter_only_check_button['state'] = ACTIVE
+            return None
+
+        ## 绑定关闭窗口与on_closing函数
         self.top.protocol("WM_DELETE_WINDOW", on_closing)
 
+        ## 记录启动时间
+        start_time = time.time()
+        ## 记录启动时间（纳秒级别）
+        self.start_time_ns = time.time_ns()
+        ## 复制启动时间（纳秒级别）并保持不变
+        start_time_ns = self.start_time_ns
+        num_of_books_downloaded = self.num_of_books_downloaded
+
         ## 开始爬取书籍
-        for url in urls:
+        for idx in range(0, num_of_books):
+            ## 如果启动时间被更新，代表本次爬取已经结束，不启动余下任何爬虫
+            if start_time_ns != self.start_time_ns:
+                break
+            ## 赋予当前url
+            url = urls[idx]
             ## 每当上一次爬取结束，刷新页面信息
             self.title_label['text'] = "书名：等待响应中..."
             self.author_label['text'] = "作者：等待响应中..."
@@ -417,16 +461,65 @@ class SpiderGUI(object):
             ## 启动只爬取最后一百章
             if self.latest_chapter_only_check_button.var.get() == True:
                 spider.num_of_chapters_wanted = 100
-            #3 启动爬虫
+            ## 启动爬虫
             spider.crawl_novel()
+            ## 删除爬虫
+            del spider
             ## 爬取后取消勾选
-            for choice_button in self.choice_buttons:
-                if self.book_info[choice_button.cget("text")] == url:
-                    choice_button.deselect()
+            if self.num_of_books_downloaded - num_of_books_downloaded == 1:
+                for choice_button in self.choice_buttons:
+                    if self.book_info[choice_button.cget("text")] == url:
+                        choice_button.deselect()
+                        break
+            ## 重新赋值
+            num_of_books_downloaded = self.num_of_books_downloaded
+
+        ## 更新时间信息
+        current_time = time.time()
+        time_used = current_time - start_time
+        hours_used = time_used // 3600
+        minutes_used = (time_used % 3600) // 60
+        seconds_used = time_used % 60
+        if hours_used > 99:
+            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {hours_used:0>1.0f}时{minutes_used:0>2.0f}分'
+        elif hours_used > 0:
+            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {hours_used:0>1.0f}时{minutes_used:0>2.0f}分{seconds_used:0>2.0f}秒'
+        elif minutes_used > 0:
+            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {minutes_used:0>2.0f}分{seconds_used:0>2.0f}秒'
+        else:
+            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {seconds_used:0>2.0f}秒'
+
         ## 关闭程序
         on_closing()
         ## 显示弹窗
-        self.about_software()
+        self.pop_window(msg)
+
+    ## 打赏页面
+    def pop_window(self, msg):
+        ## 预定义弹窗变量
+        top_background_color = 'white'
+        top_forebackground_color = 'black'
+        top_label_font = tkFont.Font(size=16, weight='bold')
+        ## 创建弹窗
+        top = Toplevel(master=self.master, bg=top_background_color)
+        top.title('小说下载结果')
+        top_level_width = 500
+        top_level_height = 200
+        top.iconbitmap(self.master_icon_path)
+        alignstr = f'{int(top_level_width)}x{int(top_level_height)}+{int((self.screenwidth - top_level_width) / 2)}+{int((self.screenheight - top_level_height) / 2)}'
+        top.geometry(alignstr)
+        top.grab_set()  # 置顶页面
+        top.attributes('-alpha', 0.9)
+        top.resizable(False, False)
+        ## 创建二维码窗口
+        qr_code_path = self.get_resource_path(f'{"img"}{os.sep}{"sponsorship.png"}')
+        global qr_code
+        qr_code = ImageTk.PhotoImage(Image.open(qr_code_path))
+        qr_code_label = Label(master= top, image=qr_code, text="微信赞赏码", compound='bottom')
+        qr_code_label.place(anchor=W, relx=0.1, rely=0.5)
+        ## 创建文字窗口
+        text_label = Label(master=top, text=f"{msg}\n\n打个赏吧！求求了！", font=top_label_font, bg='white', justify=LEFT)
+        text_label.place(anchor=W, relx=0.5, rely=0.5)
 
     ## 将书籍从输入框添加进缓存区
     def add_book(self):
@@ -444,10 +537,14 @@ class SpiderGUI(object):
         for choice_button in self.choice_buttons:
             choice_button.select()
 
-    ## 取消全选
-    def cancel_select_all(self):
+    ## 反选
+    def reverse_selected(self):
         for choice_button in self.choice_buttons:
-            choice_button.deselect()
+            if choice_button.var.get() == True:
+                choice_button.deselect()
+            else:
+                choice_button.select()
+
 
     ## 删除选中项目
     def delete_selected(self):
@@ -467,7 +564,7 @@ class SpiderGUI(object):
         ## 禁止编辑缓存区
         self.choice_panel.config(state=DISABLED)
 
-
+    ## 从书单中加载书籍和其对应链接
     def load_info_list(self):
         fin = open("book_info.html", 'r', encoding='UTF-8')
         regx = re.compile('<dt><a href="(?P<url>.*?)">(?P<title>.*?)</a></dt>')
@@ -481,37 +578,10 @@ class SpiderGUI(object):
     def save_info_list(self):
         fout = open("book_info.html", 'w', encoding='UTF-8')
         fout.write(html_prefix)
-        for book_title in self.book_info:
+        for book_title in sorted(self.book_info.keys(), key=self.to_pinyin, reverse=False):
             fout.write(f'          <dt><a href="{self.book_info[book_title]}">{book_title}</a></dt>\n')
         fout.write(html_postfix)
         fout.close()
-
-    ## 打赏页面
-    def about_software(self):
-        ## 预定义弹窗变量
-        top_background_color = 'white'
-        top_forebackground_color = 'black'
-        top_label_font = tkFont.Font(size=16, weight='bold')
-        ## 创建弹窗
-        top = Toplevel(master=self.master, bg=top_background_color)
-        top.title('关于应用')
-        top_level_width = 500
-        top_level_height = 200
-        top.iconbitmap(self.master_icon_path)
-        alignstr = f'{int(top_level_width)}x{int(top_level_height)}+{int((self.screenwidth - top_level_width) / 2)}+{int((self.screenheight - top_level_height) / 2)}'
-        top.geometry(alignstr)
-        top.grab_set()  # 置顶页面
-        top.attributes('-alpha', 0.9)
-        top.resizable(False, False)
-        ## 创建二维码窗口
-        qr_code_path = self.get_resource_path(f'{"img"}{os.sep}{"sponsorship.png"}')
-        global qr_code
-        qr_code = ImageTk.PhotoImage(Image.open(qr_code_path))
-        qr_code_label = Label(master= top, image=qr_code, text="微信赞赏码", compound='bottom')
-        qr_code_label.place(anchor=W, relx=0.1, rely=0.5)
-        ## 创建文字窗口
-        text_label = Label(master=top, text="用都用了，打个赏呗~", font=top_label_font, bg='white')
-        text_label.place(anchor=W, relx=0.5, rely=0.5)
 
     def open_save_path(self):
         self.novel_path = os.getcwd()+os.sep+'fiction'

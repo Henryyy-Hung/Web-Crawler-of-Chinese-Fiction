@@ -2,8 +2,11 @@
 import re
 import os
 import time
+import psutil
+import random
 import requests
 import threading
+import statistics
 import WordProcessingTools
 from selenium import webdriver
 from my_fake_useragent import UserAgent
@@ -79,15 +82,18 @@ class NovelSpider(object):
         self.__regx_of_chap_title = []
         self.__regx_of_chap_content = []
         self.__speed_of_crawling = 1
-        self.__num_of_chapters_wanted = 0
         self.__crawler_mode = 'requests'
         ## 自动处理的信息
         self.__title_of_book = ''
         self.__author_of_book = ''
         self.__url_of_chapters = []
         self.__content = dict()
+        self.__num_of_chapters_wanted = 0
         self.__start_time = time.time()
+        self.__start_time_ns = time.time_ns()
         self.__last_modify_time = time.time()
+        self.__current_cpu_percent = 0
+        self.__max_cpu_percent = 15
         self.__state = True
         ## 保存路径
         self.novel_path = os.getcwd() + os.sep + "fiction"
@@ -205,11 +211,6 @@ class NovelSpider(object):
         return self.__crawler_mode
     @crawler_mode.setter
     def crawler_mode(self, value):
-        '''
-        if value == 'selenium':
-            if self.speed_of_crawling > 3:
-                self.speed_of_crawling = 3
-        '''
         self.__crawler_mode = value
 
     @property
@@ -280,19 +281,20 @@ class NovelSpider(object):
 
     ## 输出栏 和GUI的唯一接口
     def msgbox(self, target, value):
-        if self.state == True:
-            try:
-                if target == 'progress_bar':
-                    self.__GUI.progress_bar['value'] = value
-                elif target == 'title_label':
-                    self.__GUI.title_label['text'] = value
-                elif target == 'author_label':
-                    self.__GUI.author_label['text'] = value
-                elif target == 'notice_label':
-                    self.__GUI.notice_label['text'] = value
-                self.__GUI.top.update()
-            except :
-                self.state = False
+        if (self.state == True) and (self.__GUI != None) and (self.__start_time_ns >= self.__GUI.start_time_ns):
+            if target == 'progress_bar':
+                self.__GUI.progress_bar['value'] = value
+            elif target == 'title_label':
+                self.__GUI.title_label['text'] = value
+            elif target == 'author_label':
+                self.__GUI.author_label['text'] = value
+            elif target == 'notice_label':
+                self.__GUI.notice_label['text'] = value
+            elif target == 'num_of_books_downloaded':
+                self.__GUI.num_of_books_downloaded += value
+            self.__GUI.top.update()
+        else:
+            self.state = False
 
     ## 状态条
     def status_bar(self):
@@ -324,6 +326,14 @@ class NovelSpider(object):
 
     ## 爬取小说章节名称，章节内容
     def crawl_chapter_page(self, chapter_content):
+        ## 当爬虫使用selenium时，为了防止炸cpu，每次释放爬虫前必须检查cpu占用。一旦cpu占用高于max数值，立即进入待命模式，同时更新类变量，通知主程序停止释放爬虫
+        if self.crawler_mode == 'selenium':
+            try:
+                self.__current_cpu_percent = statistics.mean(psutil.cpu_percent(interval=1, percpu=True))
+                while self.__current_cpu_percent >= self.__max_cpu_percent:
+                    self.__current_cpu_percent = statistics.mean(psutil.cpu_percent(interval=1, percpu=True))
+            except:
+                pass
         ## 向网页发送请求，得到网页内容
         try:
             response =self.get_response(chapter_content.url)
@@ -435,7 +445,6 @@ class NovelSpider(object):
             os.mkdir(self.novel_path)
         if not os.path.exists(self.report_path):
             os.mkdir(self.report_path)
-
         ## 爬取疯情书屋时进行分流 <--与主代码无关，作者个人使用-->
         if self.base_url == r'https://aabook.xyz/':
             file_path = os.sep
@@ -453,7 +462,6 @@ class NovelSpider(object):
             if not os.path.exists(new_path):
                 os.mkdir(new_path)
             self.novel_path = new_path
-
         ## 打开小说文件和报告文件
         novel = open(f'{self.novel_path}{os.sep}{self.title_of_book}.txt', 'w', encoding=output_encoding)
         report = open(f'{self.report_path}{os.sep}{self.title_of_book}_report.txt', 'w', encoding=output_encoding)
@@ -512,19 +520,35 @@ class NovelSpider(object):
         ## 输出书籍信息到屏幕上
         self.msgbox(target='title_label', value=f'书名：{self.title_of_book}')
         self.msgbox(target='author_label', value=f'作者：{self.author_of_book}')
+        ## 建立索引表
+        list_of_idx = list(range(self.start_chapter, self.stop_chapter))
+        ## 将爬取顺序打乱 - 不要从头爬到尾，乱一点好(?)
+        random.shuffle(list_of_idx)
         ## 多线程爬取章节
-        for idx in range(self.start_chapter, self.stop_chapter):
-            ## 进行判定，是否终止程序
+        for idx in list_of_idx:
+            ## 检查GUI是否已终止爬取任务，决定是否终止程序
             if self.state == False:
                 return False
+            ## 检测cpu使用率是否超标，标记红色进度条以示暂停。注：如果不是使用selenium，current cpu percent初始值为零，此处应永远不会被触发。
+            if self.crawler_mode == 'selenium':
+                try:
+                    while self.__current_cpu_percent >= self.__max_cpu_percent:
+                        self.__GUI.progress_bar.configure(style="red.Horizontal.TProgressbar")
+                        time.sleep(1)
+                    self.__GUI.progress_bar.configure(style="blue.Horizontal.TProgressbar")
+                except:
+                    pass
             ## 显示进度条
             self.status_bar()
+            ## 创建章节内容实例
             url_of_chapter = self.url_of_chapters[idx]
             self.content[idx] = ChapterContent(url=url_of_chapter)
+            ## 检测是否存在分卷名
             if 'http' not in url_of_chapter:
                 self.content[idx].title = url_of_chapter
                 self.content[idx].ready = True
                 continue
+            ## 开启本章节爬取新线程
             try:
                 thread = threading.Thread(target=self.crawl_chapter_page, args=(self.content[idx],))
                 thread.start()
@@ -535,11 +559,12 @@ class NovelSpider(object):
                 time.sleep(access_rate)
         ## 等待线程执行完毕
         while len(self) < self.total_chapter and time.time() - self.__last_modify_time < 60:
-            ## 进行判定，是否终止程序
+            ## 检查GUI是否已终止爬取任务，决定是否终止程序
             if self.state == False:
                 return False
             time.sleep(0.1)
             self.status_bar()
+        ## 从此处开始，用户对GUI的操作将不会影响到文件的保存
         self.status_bar()
         self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，保存文件中。')
         try:
@@ -548,6 +573,8 @@ class NovelSpider(object):
             time.sleep(0.5)
             ## 生成提示
             self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，TXT文件已保存。')
+            ## 仅当文件成功保存才会传递信息给GUI
+            self.msgbox(target='num_of_books_downloaded', value=1)
         except:
             ## 生成提示
             self.msgbox(target='notice_label', value=f'提示：【{self.title_of_book}】爬取完毕，TXT文件保存失败。')
@@ -567,7 +594,7 @@ class NovelSpider(object):
             self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<h1 class="chapter_title">(.*?)</h1>']
             self.regx_of_chap_content = [r'<div class="chapter_con" id="chapter_content">(.*?)</div>',r'<p>(.*?)</p>']
-            self.speed_of_crawling = 0.5
+            self.speed_of_crawling = 0.8
             self.crawler_mode = 'selenium'
         elif r'www.31xs.net' in url or r'www.31xs.com' in url:
             url = url.replace(r'www.31xs.com', r'www.31xs.net')
@@ -645,6 +672,8 @@ class NovelSpider(object):
             return False
         return True
 
+    ## 以下函数是作者自己用来测试程序的，与主程序无关。
+
     ## 用来测试 requests 和 selenium 获取的html文档有何不同
     def test(self, url, encode, crawler_mode = 'requests'):
         self.encode = encode
@@ -664,7 +693,6 @@ class NovelSpider(object):
         self.crawl_chapter_page(self.content[0])
         self.novel_path = os.getcwd() + os.sep + "fiction_report"
         self.save_novel()
-
 
 if __name__ == "__main__":
     url = input("url: ")
