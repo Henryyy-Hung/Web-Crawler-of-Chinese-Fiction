@@ -513,8 +513,8 @@ class NovelSpider(object):
         self.stop_chapter = len(self.url_of_chapters)
         self.total_chapter = self.stop_chapter - self.start_chapter
         ## 限制速度
-        if self.speed_of_crawling > 10:
-             self.__speed_of_crawling = 10
+        if self.speed_of_crawling > 8:
+             self.__speed_of_crawling = 8
         ## 定义访问率
         access_rate = 1 / self.speed_of_crawling
         ## 输出书籍信息到屏幕上

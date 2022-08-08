@@ -17,38 +17,52 @@ from tkinter.scrolledtext import ScrolledText
 
 html_prefix =\
 '''
-
 <!DOCTYPE HTML>
 <html>
 
   <head>
 
     <meta charset="utf-8" / >
-    
+
     <title>我的书单</title>
-    
+
     <base target="_blank" />
 
     <!-- no link -->
-    
+
     <meta name="author" content="小说爬虫" />
     <meta name="generator" content="小说爬虫" />
     <meta name="description" content="用户自定义的书单" />
     <meta name="keywords" content="自定义书单,爬虫" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <!-- no script -->
-    
+
     <style type="text/css" media="screen">
-    
-    body {
-      background: url(https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/src/img/wood.jpg?raw=true) left top repeat;
-	  background-color: rgb(231, 212, 182);
-      background-attachment: fixed;	  
-      box-sizing: border-box;
+	
+	* {
+	   box-sizing: border-box;
     }
-    
-    #container {
+
+    body {
+      background: rgb(231, 212, 182) url(https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/src/img/wood.jpg?raw=true) repeat fixed top left;
+      <!--
+      background-image: linear-gradient(to right top, rgb(155, 196, 202), rgb(180, 209, 213), rgb(220, 240, 249), rgb(180, 209, 213), rgb(155, 196, 202));
+      //-->
+      background-attachment: fixed;
+      --fontsize: 24px;
+      font-size: var(--fontsize);
+    }
+
+    .noselect {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    .container {
       max-width: 70%;
       margin: 50px 0px;
       background-color: rgba(255, 255, 255, 0.7);
@@ -58,115 +72,145 @@ html_prefix =\
       box-shadow: 0px 0px 15px black;
       padding: 30px;
     }
-    
-    #header {
+
+    .header {
       color:black;
       text-align:center;
       font-size: 2em;
-	  font-weight: 600;
+      font-weight: 600;
     }
-    
-    #book_list {
-	  margin: 2em auto;
+
+    .book_list {
+      margin: 2em auto;
     }
-    
+
     dl {
       list-style-type:none;
       counter-reset: list_num;
       text-align: justify;
       text-align-last: justify;
     }
-    
+
     dt {
       display: inline-block;
-	  text-align: left;
+      text-align: left;
       text-align-last: left;
-	  vertical-align: top;
+      vertical-align: top;
+      width: 15em;
     }
-    
+
+    dt>a {
+      animation: fade-in 1s ease-in 0s 1 normal;
+      animation-fill-mode: both;
+      <!--
+      animation-name: fade-in;
+      animation-duration: 1s;
+      animation-timing-function: ease-in;
+      animation-delay: 0s;
+      animation-iteration-count: 1;
+      animation-direction: normal;
+      //-->
+    }
+
     dt>a::before {
       counter-increment: list_num;
       content: counter(list_num) ". ";
     }
-    
+
     dt>a {
       display: inline-block;
       border-radius: 10px;
       padding: 10px;
       width: 15em;
-	  white-space: normal;
+      white-space: normal;
       text-overflow:ellipsis;
       white-space: nowrap;
       overflow: hidden;
     }
-    
+
     dt>a:link, dt>a:visited, dt>a:active, dt>a:hover {
       color: black;
       background-color: transparent;
       text-decoration: none;
     }
-    
+
     dt>a:hover {
       background-color: rgba(255,255,255,0.5);
-	  white-space: normal;
+      white-space: normal;
+      position: relative;
+      transform: scale(1.05,1.05);
+      transition-duration: 0.15s;
+      z-index: 2147483647;
     }
-    
+
     dt>a:active {
-      background-color: rgba(255,255,255,0.8);
+      background-color: rgba(255,255,255,1);
+      box-shadow: 0 0 10px 1px rgba(0, 140, 186, 0.5);
     }
-    
-    #footer {
+
+    .footer {
       text-align: center;
-      color: red;
+      margin-top: 20px;
     }
-	
-	address>a:link, address>a:visited, address>a:active, address>a:hover {
-	  animation-name: shift_color;
-      animation-duration: 0.2s;
-	  animation-iteration-count: infinite;
-	  animation-direction: alternate;
-	}
-	
-	@keyframes shift_color {
-	  from  {color: black;}
-	  to  {color: blue;}
+
+    address>a:link, address>a:visited, address>a:active, address>a:hover {
+      animation-name: shift_color;
+      animation-duration: 1s;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
     }
-	
-	
-    
+
+    @keyframes shift_color {
+      0% {color: black;}
+      100% {color: blue;}
+    }
+
+    @keyframes fade-in {
+      0% {opacity: 0;}
+      100% {opacity: 1;}
+    }
     </style>
-        
+
   </head>
-    
-  <body>
-  
-    <div id="container">
-    
-      <div id="header">
+
+  <body class="noselect">
+
+    <div class="container">
+
+      <div class="header">
           我的书单
       </div>
-	  
+
       <hr />
-	        
-      <div id="book_list">
+
+      <div class="book_list">
         <dl>
 '''
 
 html_postfix =\
-'''
+'''        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+
         </dl>
       </div>
-	  
+
       <hr />
-      
-      <div id="footer">
-          <address> 
+
+      <div class="footer">
+          <address>
             <a href="https://github.com/Henryyy-Hung/Web-Spider-of-Chinese-Fiction" id="source">点此跳转至软件主页</a>
           </address>
       </div>
-    
+
     </div>
-    
+
   </body>
 
 </html>
@@ -186,7 +230,7 @@ class SpiderGUI(object):
 
         ## 预定义主窗口变量
         self.background_color = '#bdc0c8'
-        self.master_frame_title = '小说爬虫  v1.1.2'
+        self.master_frame_title = '小说爬虫  v1.1.3'
         self.master_frame_width = 600
         self.master_frame_height = 450
         self.master_icon_path = self.get_resource_path(f'{"img"}{os.sep}{"icon.ico"}') #f'{os.getcwd()}{os.sep}{"img"}{os.sep}{"icon.ico"}'
@@ -279,7 +323,7 @@ class SpiderGUI(object):
         self.book_url_entry.bind("<Button-1>", self.clear_book_url_entry_text)
 
         ## 创建滚动面板
-        self.choice_panel = ScrolledText(master=self.level_3_NW_frame, selectbackground='white', selectforeground='blue')
+        self.choice_panel = ScrolledText(master=self.level_3_NW_frame, selectbackground='white', selectforeground='blue', cursor="arrow")
         self.choice_panel.place(anchor=CENTER, relx=0.5, rely=0.5, relwidth=0.95, relheight=0.95)
 
         ## 列表选项变量
@@ -295,6 +339,8 @@ class SpiderGUI(object):
         ## 创建选项列表
         for book_name in sorted(self.book_info.keys(), key=self.to_pinyin, reverse=True):
             self.create_choice_button(book_title=book_name)
+        ## 禁止编辑缓存区
+        self.choice_panel.config(state=DISABLED)
 
 
         def link_to_github_scroll_handler(event):
@@ -561,6 +607,8 @@ class SpiderGUI(object):
         for choice_button in self.choice_buttons:
             self.choice_panel.window_create('1.0', window=choice_button)
             self.choice_panel.insert('1.0', '\n\n')
+        ## 清空多余空行
+        self.choice_panel.delete(f'{2*len(self.choice_buttons)+2}.0', END)
         ## 禁止编辑缓存区
         self.choice_panel.config(state=DISABLED)
 
