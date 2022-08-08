@@ -10,6 +10,7 @@
 ## **预览图片**
 <img src="https://user-images.githubusercontent.com/78750074/179153333-c544e2c9-b499-43d4-96a2-79edf1a1ee0c.jpg" alt="demo" width="640" height="320" />
 <img src="https://user-images.githubusercontent.com/78750074/183332140-c4bde035-b525-4735-84ae-fe09266128f4.png" alt="booklist" width="640" height="320" />
+（没错我在学习html和css，这界面做的好看吧哈哈哈哈）
 
 ## **制作目的**
 * 提供一款真正简单易用的小说下载器。
