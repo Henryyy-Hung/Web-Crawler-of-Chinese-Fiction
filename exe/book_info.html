@@ -3,113 +3,211 @@
 <html>
 
   <head>
-  
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/ >
-        
+
+    <meta charset="utf-8" / >
+
     <title>我的书单</title>
-    
-    <base target="_blank"/>
-    
+
+    <base target="_blank" />
+
     <!-- no link -->
-    
+
     <meta name="author" content="小说爬虫" />
     <meta name="generator" content="小说爬虫" />
     <meta name="description" content="用户自定义的书单" />
     <meta name="keywords" content="自定义书单,爬虫" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <!-- no script -->
-    
+
     <style type="text/css" media="screen">
+	
+	* {
+	   box-sizing: border-box;
+    }
+
     body {
-    background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
+      background: rgb(231, 212, 182) url(https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/src/img/wood.jpg?raw=true) repeat fixed top left;
+      <!--
+      background-image: linear-gradient(to right top, rgb(155, 196, 202), rgb(180, 209, 213), rgb(220, 240, 249), rgb(180, 209, 213), rgb(155, 196, 202));
+      //-->
+      background-attachment: fixed;
+      --fontsize: 24px;
+      font-size: var(--fontsize);
     }
-    #header {
-    color:black;
-    text-align:center;
-    text-shadow: 2px 2px 2px #bbbbbb;
+
+    .noselect {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
-    #section {
-    align:center;
+
+    .container {
+      max-width: 70%;
+      margin: 50px 0px;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 30px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0px 0px 15px black;
+      padding: 30px;
     }
-    #book_list {
-    display: table;
-    margin: 0 auto;
-    font-size:x-large;
-    max-width: 16em;
+
+    .header {
+      color:black;
+      text-align:center;
+      font-size: 2em;
+      font-weight: 600;
     }
-    #footer {
-    border-top: #bbbbbb solid 2px;
-    background-image:url(https://raw.githubusercontent.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/main/src/img/web_background.png);
-    color:black;
-    text-align:right;
-    position:fixed;
-    bottom:0em;
-    width:99%;
-    padding: 0.5em 0 0.5em 0;
+
+    .book_list {
+      margin: 2em auto;
     }
-    a:link {
-    color: black;
-    background-color: transparent;
-    text-decoration: none;
+
+    dl {
+      list-style-type:none;
+      counter-reset: list_num;
+      text-align: justify;
+      text-align-last: justify;
     }
-    a:visited {
-    color: black;
-    background-color: transparent;
-    text-decoration: none;
+
+    dt {
+      display: inline-block;
+      text-align: left;
+      text-align-last: left;
+      vertical-align: top;
+      width: 15em;
     }
-    a:hover {
-    color: blue;
-    background-color: transparent;
-    text-decoration: none;
+
+    dt>a {
+      animation: fade-in 1s ease-in 0s 1 normal;
+      animation-fill-mode: both;
+      <!--
+      animation-name: fade-in;
+      animation-duration: 1s;
+      animation-timing-function: ease-in;
+      animation-delay: 0s;
+      animation-iteration-count: 1;
+      animation-direction: normal;
+      //-->
     }
-    a:active {
-    color: blue;
-    background-color: transparent;
-    text-decoration: none;
+
+    dt>a::before {
+      counter-increment: list_num;
+      content: counter(list_num) ". ";
+    }
+
+    dt>a {
+      display: inline-block;
+      border-radius: 10px;
+      padding: 10px;
+      width: 15em;
+      white-space: normal;
+      text-overflow:ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    dt>a:link, dt>a:visited, dt>a:active, dt>a:hover {
+      color: black;
+      background-color: transparent;
+      text-decoration: none;
+    }
+
+    dt>a:hover {
+      background-color: rgba(255,255,255,0.5);
+      white-space: normal;
+      position: relative;
+      transform: scale(1.05,1.05);
+      transition-duration: 0.15s;
+      z-index: 2147483647;
+    }
+
+    dt>a:active {
+      background-color: rgba(255,255,255,1);
+      box-shadow: 0 0 10px 1px rgba(0, 140, 186, 0.5);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    address>a:link, address>a:visited, address>a:active, address>a:hover {
+      animation-name: shift_color;
+      animation-duration: 1s;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+    }
+
+    @keyframes shift_color {
+      0% {color: black;}
+      100% {color: blue;}
+    }
+
+    @keyframes fade-in {
+      0% {opacity: 0;}
+      100% {opacity: 1;}
     }
     </style>
-        
+
   </head>
-    
-  <body>
-  
-    <div id="header">
-      <h1>我的书单</h1>
-      <hr />
-    </div>
-    
-    <div id="section">
-      <div id="book_list">
-        <ol>
-        <li><a href="https://www.31xs.net/188/188866/">明克街13号</a></li>
-        <li><a href="https://www.31xs.net/190/190728/">道诡异仙</a></li>
-        <li><a href="https://www.31xs.net/184/184735/">呢喃诗章</a></li>
-        <li><a href="https://www.31xs.net/193/193936/">圣女帮我模拟修仙</a></li>
-        <li><a href="http://www.bqxs520.com/115899/">潜渊症候群</a></li>
-        <li><a href="https://www.31xs.net/191/191565/">我的夫人竟是魔教教主</a></li>
-        <li><a href="https://www.31xs.net/195/195224/">择日飞升</a></li>
-        <li><a href="https://www.31xs.net/193/193719/">赤侠</a></li>
-        <li><a href="https://www.31xs.net/148/148561/">赤心巡天</a></li>
-        <li><a href="https://www.31xs.net/178/178305/">钢铁火药和施法者</a></li>
-        <li><a href="https://www.31xs.net/173/173284/">旧日之箓</a></li>
-        <li><a href="https://www.31xs.net/147/147884/">旧神残梦</a></li>
-        <li><a href="https://www.31xs.net/191/191564/">女主从书里跑出来了怎么办</a></li>
-        <li><a href="https://www.31xs.net/139/139480/">熟睡之后</a></li>
-        <li><a href="https://www.31xs.net/174/174752/">我有一个剑仙娘子</a></li>
-        <li><a href="https://www.31xs.net/188/188423/">我有一口黄金棺</a></li>
 
-        </ol>
-        <br />
+  <body class="noselect">
+
+    <div class="container">
+
+      <div class="header">
+          我的书单
       </div>
+
+      <hr />
+
+      <div class="book_list">
+        <dl>
+          <dt><a href="https://www.31xs.net/193/193719/">赤侠</a></dt>
+          <dt><a href="https://www.31xs.net/148/148561/">赤心巡天</a></dt>
+          <dt><a href="https://www.31xs.net/190/190728/">道诡异仙</a></dt>
+          <dt><a href="https://www.31xs.net/178/178305/">钢铁火药和施法者</a></dt>
+          <dt><a href="https://www.31xs.net/173/173284/">旧日之箓</a></dt>
+          <dt><a href="https://www.31xs.net/147/147884/">旧神残梦</a></dt>
+          <dt><a href="https://www.31xs.net/188/188866/">明克街13号</a></dt>
+          <dt><a href="https://www.31xs.net/184/184735/">呢喃诗章</a></dt>
+          <dt><a href="https://www.31xs.net/191/191564/">女主从书里跑出来了怎么办</a></dt>
+          <dt><a href="http://www.bqxs520.com/115899/">潜渊症候群</a></dt>
+          <dt><a href="https://www.31xs.net/193/193936/">圣女帮我模拟修仙</a></dt>
+          <dt><a href="https://www.31xs.net/139/139480/">熟睡之后</a></dt>
+          <dt><a href="https://www.31xs.net/191/191565/">我的夫人竟是魔教教主</a></dt>
+          <dt><a href="https://www.31xs.net/188/188423/">我有一口黄金棺</a></dt>
+          <dt><a href="https://www.31xs.net/174/174752/">我有一个剑仙娘子</a></dt>
+          <dt><a href="http://www.bqxs520.com/127039/">我运行了这个世界</a></dt>
+          <dt><a href="https://www.31xs.net/195/195224/">择日飞升</a></dt>
+          <dt><a href="https://www.31xs.net/200/200467/">遮天之凡体崛起</a></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+        <dt></dt>
+
+        </dl>
+      </div>
+
+      <hr />
+
+      <div class="footer">
+          <address>
+            <a href="https://github.com/Henryyy-Hung/Web-Spider-of-Chinese-Fiction" id="source">点此跳转至软件主页</a>
+          </address>
+      </div>
+
     </div>
 
-    <div id="footer">
-      <address>
-        软件主页:&nbsp;<a href="https://github.com/Henryyy-Hung/Web-Spider-of-Chinese-Fiction"><i>点此跳转</i></a>&nbsp;<br />
-      </address>
-    </div>
-    
   </body>
 
 </html>
