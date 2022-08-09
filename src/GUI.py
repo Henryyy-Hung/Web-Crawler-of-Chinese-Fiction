@@ -15,6 +15,7 @@ from tkinter import font as tkFont
 from pypinyin import pinyin, Style
 from tkinter.scrolledtext import ScrolledText
 
+## book_info.html 的格式定义
 html_prefix =\
 '''
 <!DOCTYPE HTML>
@@ -219,6 +220,7 @@ html_postfix =\
 ## 用于爬取网络小说的爬虫对象
 class SpiderGUI(object):
 
+    ## 初始化窗口
     def __init__(self):
         ## 设置选项容器
         self.choice_buttons = []
@@ -608,7 +610,6 @@ class SpiderGUI(object):
             else:
                 choice_button.select()
 
-
     ## 删除选中项目
     def delete_selected(self):
         ## 允许编辑缓存区
@@ -633,8 +634,6 @@ class SpiderGUI(object):
         ## 每次删除完书籍后移动到初始位置
         self.choice_panel.yview_moveto(0)
 
-
-
     ## 从书单中加载书籍和其对应链接
     def load_info_list(self):
         fin = open("book_info.html", 'r', encoding='UTF-8')
@@ -654,6 +653,7 @@ class SpiderGUI(object):
         fout.write(html_postfix)
         fout.close()
 
+    ## 打开已保存的文件
     def open_save_path(self):
         self.novel_path = os.getcwd()+os.sep+'fiction'
         if not os.path.exists(self.novel_path):
@@ -693,7 +693,7 @@ class SpiderGUI(object):
         ## 禁止编辑缓存区
         self.choice_panel.config(state=DISABLED)
 
-        ## 右键可编辑选项
+        ## 右键单击可编辑选项
         def RightClickChoiceButton(event):
             self.book_title_entry.delete(0, END)
             self.book_url_entry.delete(0, END)
@@ -702,7 +702,8 @@ class SpiderGUI(object):
             self.book_title_entry.xview_moveto(0)
             self.book_url_entry.xview_moveto(1)
         choice_button.bind("<Button-3>", RightClickChoiceButton)
-        ## 右键选项可直接打开网页
+
+        ## 右键双击选项可直接打开网页
         choice_button.bind("<Double-Button-3>", lambda e: webbrowser.open_new_tab(f'{self.book_info[choice_button.cget("text")]}'))
 
         ## 使得在图标上也能滚动候选区
@@ -739,8 +740,3 @@ class SpiderGUI(object):
     @staticmethod
     def to_pinyin(s):
         return ''.join(chain.from_iterable(pinyin(s, style=Style.TONE3)))
-
-
-
-
-
