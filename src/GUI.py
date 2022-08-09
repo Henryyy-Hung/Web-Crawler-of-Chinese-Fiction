@@ -316,14 +316,21 @@ class SpiderGUI(object):
         self.book_title_entry.place(anchor=CENTER, relx=0.15, rely=0.5, relwidth=0.3, relheight=0.7)
         self.book_title_entry.insert(0, '书名')
         self.book_title_entry.bind("<Button-1>", self.clear_book_title_entry_text)
+        self.book_title_entry.bind("<FocusIn>", self.clear_book_title_entry_text)
+        self.book_title_entry.bind("<KeyPress>", self.clear_book_title_entry_text)
         ## 链接输入框
         self.book_url_entry = Entry(master=self.level_4_input_frame, font=self.entry_font, borderwidth=self.entry_border_width)
         self.book_url_entry.place(anchor=CENTER, relx=0.6725, rely=0.5, relwidth=0.655, relheight=0.7)
         self.book_url_entry.insert(0, '链接')
         self.book_url_entry.bind("<Button-1>", self.clear_book_url_entry_text)
+        self.book_url_entry.bind("<FocusIn>", self.clear_book_url_entry_text)
+        self.book_url_entry.bind("<KeyPress>", self.clear_book_url_entry_text)
+        ## 允许使用ENTER键进行输入
+        self.book_title_entry.bind('<KeyRelease-Return>', lambda e: e.widget.tk_focusNext().focus())
+        self.book_url_entry.bind('<KeyRelease-Return>', lambda e: self.add_book())
 
         ## 创建滚动面板
-        self.choice_panel = ScrolledText(master=self.level_3_NW_frame, selectbackground='white', selectforeground='blue', cursor="arrow")
+        self.choice_panel = ScrolledText(master=self.level_3_NW_frame, selectbackground='white', selectforeground='blue', cursor="arrow", wrap=NONE)
         self.choice_panel.place(anchor=CENTER, relx=0.5, rely=0.5, relwidth=0.95, relheight=0.95)
 
         ## 列表选项变量
@@ -339,6 +346,10 @@ class SpiderGUI(object):
         ## 创建选项列表
         for book_name in sorted(self.book_info.keys(), key=self.to_pinyin, reverse=True):
             self.create_choice_button(book_title=book_name)
+        ## 允许编辑缓存区
+        self.choice_panel.config(state=NORMAL)
+        ## 在结尾加上空行
+        self.choice_panel.insert(END, '\n\n')
         ## 禁止编辑缓存区
         self.choice_panel.config(state=DISABLED)
 
@@ -571,12 +582,18 @@ class SpiderGUI(object):
     def add_book(self):
         title = self.book_title_entry.get()
         url = self.book_url_entry.get()
-        if title not in self.book_info.keys() and title != '书名' and url != "链接" and "http" in url :
-            self.create_choice_button(book_title=title, book_url=url, selected=True)
+        if title != '书名' and url != "链接" and "http" in url:
+            if title not in self.book_info.keys():
+                self.create_choice_button(book_title=title, book_url=url, selected=True)
+            else:
+                self.book_info[title] = url
             self.book_title_entry.delete(0, END)
             self.book_url_entry.delete(0, END)
             self.book_title_entry.insert(0, '书名')
             self.book_url_entry.insert(0, '链接')
+            self.master.focus()
+            ## 每次添加完书籍后移动到初始位置
+            self.choice_panel.yview_moveto(0)
 
     ## 全选缓存区中所有书籍
     def select_all(self):
@@ -606,11 +623,17 @@ class SpiderGUI(object):
         ## 重新载入剩余项目
         for choice_button in self.choice_buttons:
             self.choice_panel.window_create('1.0', window=choice_button)
-            self.choice_panel.insert('1.0', '\n\n')
+            self.choice_panel.insert('1.0', '\n\n  ')
         ## 清空多余空行
         self.choice_panel.delete(f'{2*len(self.choice_buttons)+2}.0', END)
+        ## 在结尾加上空行
+        self.choice_panel.insert(END, '\n\n')
         ## 禁止编辑缓存区
         self.choice_panel.config(state=DISABLED)
+        ## 每次删除完书籍后移动到初始位置
+        self.choice_panel.yview_moveto(0)
+
+
 
     ## 从书单中加载书籍和其对应链接
     def load_info_list(self):
@@ -656,7 +679,7 @@ class SpiderGUI(object):
             self.book_info[book_title] = book_url
         ## 创建选项
         var = IntVar()
-        choice_button = Checkbutton(self.choice_panel, text=book_title, bg=self.choice_button_background_color, anchor='w', font=self.choice_button_font, variable=var, onvalue=1, offvalue=0)
+        choice_button = Checkbutton(self.choice_panel, text=book_title, bg=self.choice_button_background_color, anchor='w', font=self.choice_button_font, variable=var, onvalue=1, offvalue=0, cursor="hand2")
         choice_button.var = var
         ## 根据需求来预选项目
         if selected==True:
@@ -666,9 +689,33 @@ class SpiderGUI(object):
         ## 将项目加入缓存区
         self.choice_buttons.append(choice_button)
         self.choice_panel.window_create('1.0', window=choice_button)
-        self.choice_panel.insert('1.0', '\n\n')
+        self.choice_panel.insert('1.0', '\n\n  ')
         ## 禁止编辑缓存区
         self.choice_panel.config(state=DISABLED)
+
+        ## 右键可编辑选项
+        def RightClickChoiceButton(event):
+            self.book_title_entry.delete(0, END)
+            self.book_url_entry.delete(0, END)
+            self.book_title_entry.insert(0, choice_button.cget("text"))
+            self.book_url_entry.insert(0, self.book_info[choice_button.cget("text")])
+            self.book_title_entry.xview_moveto(0)
+            self.book_url_entry.xview_moveto(1)
+        choice_button.bind("<Button-3>", RightClickChoiceButton)
+        ## 右键选项可直接打开网页
+        choice_button.bind("<Double-Button-3>", lambda e: webbrowser.open_new_tab(f'{self.book_info[choice_button.cget("text")]}'))
+
+        ## 使得在图标上也能滚动候选区
+        def OnMouseWheel(event):
+            self.choice_panel.yview_scroll(int(-1*(event.delta/40)), "units")
+            return "break"
+        choice_button.bind("<MouseWheel>", OnMouseWheel)
+        choice_button.bind("<Button-4>", OnMouseWheel)
+        choice_button.bind("<Button-5>", OnMouseWheel)
+
+        ## 设定选项的悬浮样式
+        choice_button.bind('<Enter>', lambda e: choice_button.configure(bg=choice_button['activebackground']))
+        choice_button.bind('<Leave>', lambda e: choice_button.configure(bg=self.choice_button_background_color))
 
     ## 删除选项栏
     def delete_choice_button(self, choice_button):

@@ -510,6 +510,7 @@ class NovelSpider(object):
             return False
         ## 确认爬取章节的范围
         self.start_chapter = 0 if self.num_of_chapters_wanted <= 0 else len(self.url_of_chapters) - self.num_of_chapters_wanted
+        self.start_chapter = 0 if self.start_chapter < 0 else self.start_chapter
         self.stop_chapter = len(self.url_of_chapters)
         self.total_chapter = self.stop_chapter - self.start_chapter
         ## 限制速度
