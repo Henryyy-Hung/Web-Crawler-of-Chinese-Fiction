@@ -98,6 +98,21 @@ class NovelSpider(object):
         ## 保存路径
         self.novel_path = os.getcwd() + os.sep + "fiction"
         self.report_path = os.getcwd() + os.sep + "fiction_report"
+        ## 初始化driver option
+        try:
+            self.option = webdriver.ChromeOptions()
+            self.option.add_argument('headless')
+            self.option.add_argument("--window-size=1920,1080")
+            self.option.add_argument("--disable-extensions")
+            self.option.add_argument("--disable-gpu")
+            self.option.add_argument("--disable-software-rasterizer")
+            self.option.add_argument('--no-sandbox')
+            self.option.add_argument('--ignore-certificate-errors')
+            self.option.add_argument('--allow-running-insecure-content')
+            self.option.add_argument("blink-settings=imagesEnabled=false")
+        except:
+            pass
+        ## 父类的初始化
         super().__init__()
 
     @property
@@ -245,17 +260,7 @@ class NovelSpider(object):
         elif self.crawler_mode == 'selenium':
             for i in range(5):
                 try:
-                    option = webdriver.ChromeOptions()
-                    option.add_argument('headless')
-                    option.add_argument("--window-size=1920,1080")
-                    option.add_argument("--disable-extensions")
-                    option.add_argument("--disable-gpu")
-                    option.add_argument("--disable-software-rasterizer")
-                    option.add_argument('--no-sandbox')
-                    option.add_argument('--ignore-certificate-errors')
-                    option.add_argument('--allow-running-insecure-content')
-                    option.add_argument("blink-settings=imagesEnabled=false")
-                    browser = webdriver.Chrome(options=option)
+                    browser = webdriver.Chrome(options=self.option)
                     browser.get(url)
                     time.sleep(3)
                     response = browser.page_source.__str__()
