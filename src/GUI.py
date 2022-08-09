@@ -232,7 +232,7 @@ class SpiderGUI(object):
 
         ## 预定义主窗口变量
         self.background_color = '#bdc0c8'
-        self.master_frame_title = '小说爬虫  v1.1.3'
+        self.master_frame_title = '小说爬虫  v1.1.4'
         self.master_frame_width = 600
         self.master_frame_height = 450
         self.master_icon_path = self.get_resource_path(f'{"img"}{os.sep}{"icon.ico"}') #f'{os.getcwd()}{os.sep}{"img"}{os.sep}{"icon.ico"}'
@@ -409,7 +409,7 @@ class SpiderGUI(object):
         ## 编辑提示标签背景色
         for tip in tips:
             for sub in tip.subwidgets_all():
-                sub.configure(bg='#cbcbc9')
+                sub.configure(bg='#dddddd')
 
         ## 开始循环显示
         mainloop()
@@ -584,6 +584,7 @@ class SpiderGUI(object):
     def add_book(self):
         title = self.book_title_entry.get()
         url = self.book_url_entry.get()
+        title = title.replace("\n", "")
         if title != '书名' and url != "链接" and "http" in url:
             if title not in self.book_info.keys():
                 self.create_choice_button(book_title=title, book_url=url, selected=True)
