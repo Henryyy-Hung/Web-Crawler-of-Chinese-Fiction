@@ -599,7 +599,7 @@ class NovelSpider(object):
             self.regx_of_chap_href = [r'<p class="index_info">.*?<p class="section_title">作品相关</p>(.*?)<p class="section_title">性福宝排行榜</p>', r'<li><a href="(.*?)" title=.*?</a></li>|<p class="section_title">(.*?)</p>']
             self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<h1 class="chapter_title">(.*?)</h1>']
-            self.regx_of_chap_content = [r'<div class="chapter_con" id="chapter_content">(.*?)</div>',r'<p>(.*?)</p>']
+            self.regx_of_chap_content = [r'<div class="chapter_con" id="chapter_content">(.*?)</div>', r'<p>(.*?)</p>']
             self.speed_of_crawling = 0.8
             self.crawler_mode = 'selenium'
         elif r'www.31xs.net' in url or r'www.31xs.com' in url:
