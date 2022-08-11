@@ -50,9 +50,9 @@ UU看书|https://www.uuks.org|65000+|质量高|暂未发现
 
 ## 更新日志
  
-详情请参见[更新日志](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/CHANGELOG.md)|
+[详情请点此参见](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/CHANGELOG.md)|
 --------------------------------------------------------|
 
 ## 免责声明
-详情请参见[免责声明](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/DISCLAIMER.md)|
+[详情请点此参见](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/blob/main/DISCLAIMER.md)|
 --------------------------------------------------------|
