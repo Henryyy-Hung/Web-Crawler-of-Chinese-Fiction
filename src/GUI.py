@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import time
+import platform
 import webbrowser
 import NovelSpider
 import threading
@@ -14,6 +15,7 @@ from PIL import Image, ImageTk
 from tkinter import font as tkFont
 from pypinyin import pinyin, Style
 from tkinter.scrolledtext import ScrolledText
+
 
 ## book_info.html 的格式定义
 html_prefix =\
@@ -222,6 +224,12 @@ class SpiderGUI(object):
 
     ## 初始化窗口
     def __init__(self):
+        self.window_size = 1
+        if platform.release() == "10":
+            self.window_size = 1
+        elif platform.release() == "7":
+            self.window_size = 1.16
+
         ## 设置选项容器
         self.choice_buttons = []
 
@@ -233,8 +241,8 @@ class SpiderGUI(object):
         ## 预定义主窗口变量
         self.background_color = '#bdc0c8'
         self.master_frame_title = '小说爬虫  v1.1.5'
-        self.master_frame_width = 600
-        self.master_frame_height = 450
+        self.master_frame_width = int(600 * self.window_size)
+        self.master_frame_height = int(450 * self.window_size)
         self.master_icon_path = self.get_resource_path(f'{"img"}{os.sep}{"icon.ico"}') #f'{os.getcwd()}{os.sep}{"img"}{os.sep}{"icon.ico"}'
 
         ## 设置主窗口
@@ -455,8 +463,8 @@ class SpiderGUI(object):
         ## 创建弹窗
         self.top = Toplevel(master=self.master, bg=top_background_color)
         self.top.title('小说下载进度')
-        top_level_width = 500
-        top_level_height = 200
+        top_level_width = int(500 * self.window_size)
+        top_level_height = int(200 * self.window_size)
         alignstr = f'{int(top_level_width)}x{int(top_level_height)}+{int((self.screenwidth - top_level_width) / 2)}+{int((self.screenheight - top_level_height) / 2)}'
         self.top.geometry(alignstr)
         self.top.iconbitmap(self.master_icon_path)
@@ -566,8 +574,8 @@ class SpiderGUI(object):
         ## 创建弹窗
         top = Toplevel(master=self.master, bg=top_background_color)
         top.title('小说下载结果')
-        top_level_width = 500
-        top_level_height = 200
+        top_level_width = int(500 * self.window_size)
+        top_level_height = int(200 * self.window_size)
         top.iconbitmap(self.master_icon_path)
         alignstr = f'{int(top_level_width)}x{int(top_level_height)}+{int((self.screenwidth - top_level_width) / 2)}+{int((self.screenheight - top_level_height) / 2)}'
         top.geometry(alignstr)
