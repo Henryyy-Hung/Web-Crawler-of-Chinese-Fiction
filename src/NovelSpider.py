@@ -663,6 +663,18 @@ class NovelSpider(object):
             self.regx_of_chap_content = [r'&nbsp;(.*?)<|\s']
             self.speed_of_crawling = 20
             self.crawler_mode = 'requests'
+        elif r'www.book18.org' in url:
+            self.url_of_book = url
+            self.base_url = r'https://www.book18.org'
+            self.encode = r'UTF-8'
+            self.regx_of_book_title = [r'<h1>(.*?)</h1>']
+            self.regx_of_book_author = [r'作者：(.*?)</.*?>']
+            self.regx_of_chap_href = [r'<li class="list-group-item px-2"><a href="(.*?)" target="_blank"><b class="mr-1">.*?</a></li>']
+            self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
+            self.regx_of_chap_title = [r'<h1.*?>(.*?)</h1>']
+            self.regx_of_chap_content = [r'<div id="content" style="overflow:hidden;max-width:1000px;">(.*?)</div>']
+            self.speed_of_crawling = 20
+            self.crawler_mode = 'requests'
         else:
             self.url_of_book = url
             self.base_url = r''

@@ -18,7 +18,7 @@ def process_paragraph(string):
     ## 清除剩余html元素
     string = re.sub(pattern=r'<.*?>.*？<.*?>;', repl="", string=string, flags=re.DOTALL)
     ## 翻译剩余html语言
-    translate = {'<br>':'\n', '<br/>':'\n', '<br />':'\n', '<p>':'', '<p/>':'\n', ' ':' '}
+    translate = {'<br>':'\n', '<br/>':'\n', '<br />':'\n', '<p>':'', '</p>':'\n', ' ':' '}
     for key in translate.keys():
         string = string.replace(key, translate[key])
     ## 分行

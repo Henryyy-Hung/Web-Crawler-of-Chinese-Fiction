@@ -232,7 +232,7 @@ class SpiderGUI(object):
 
         ## 预定义主窗口变量
         self.background_color = '#bdc0c8'
-        self.master_frame_title = '小说爬虫  v1.1.4'
+        self.master_frame_title = '小说爬虫  v1.1.5'
         self.master_frame_width = 600
         self.master_frame_height = 450
         self.master_icon_path = self.get_resource_path(f'{"img"}{os.sep}{"icon.ico"}') #f'{os.getcwd()}{os.sep}{"img"}{os.sep}{"icon.ico"}'
@@ -472,6 +472,7 @@ class SpiderGUI(object):
         self.author_label.place(anchor=CENTER, relx=0.5, rely=0.4, relwidth=0.9, relheight=0.2)
         self.notice_label =  Label(master=self.top, text="提示：等待响应中...", bg=top_background_color, fg=top_forebackground_color, anchor=W)
         self.notice_label.place(anchor=CENTER, relx=0.5, rely=0.9, relwidth=0.9, relheight=0.15)
+
         ## 创建进度条
         self.progress_bar = ttk.Progressbar(master=self.top, maximum=10000, value=0, style="blue.Horizontal.TProgressbar")
         self.progress_bar.place(anchor=CENTER, relx=0.5, rely=0.65, relwidth=0.9, relheight=0.2)
@@ -539,14 +540,17 @@ class SpiderGUI(object):
         hours_used = time_used // 3600
         minutes_used = (time_used % 3600) // 60
         seconds_used = time_used % 60
-        if hours_used > 99:
-            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {hours_used:0>1.0f}时{minutes_used:0>2.0f}分'
+        ## 写入信息
+        if self.num_of_books_downloaded == 0:
+            msg = f'下载失败\n\n若非手动终止\n\n请重新参阅使用说明'
+        elif hours_used > 99:
+            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {hours_used:0>1.0f}时{minutes_used:0>2.0f}分\n\n打个赏吧！求求了！'
         elif hours_used > 0:
-            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {hours_used:0>1.0f}时{minutes_used:0>2.0f}分{seconds_used:0>2.0f}秒'
+            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {hours_used:0>1.0f}时{minutes_used:0>2.0f}分{seconds_used:0>2.0f}秒\n\n打个赏吧！求求了！'
         elif minutes_used > 0:
-            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {minutes_used:0>2.0f}分{seconds_used:0>2.0f}秒'
+            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {minutes_used:0>2.0f}分{seconds_used:0>2.0f}秒\n\n打个赏吧！求求了！'
         else:
-            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {seconds_used:0>2.0f}秒'
+            msg = f'合计: {self.num_of_books_downloaded}本书\n\n耗时: {seconds_used:0>2.0f}秒\n\n打个赏吧！求求了！'
 
         ## 关闭程序
         on_closing()
@@ -577,7 +581,7 @@ class SpiderGUI(object):
         qr_code_label = Label(master= top, image=qr_code, text="微信赞赏码", compound='bottom')
         qr_code_label.place(anchor=W, relx=0.1, rely=0.5)
         ## 创建文字窗口
-        text_label = Label(master=top, text=f"{msg}\n\n打个赏吧！求求了！", font=top_label_font, bg='white', justify=LEFT)
+        text_label = Label(master=top, text=f"{msg}", font=top_label_font, bg='white', justify=LEFT)
         text_label.place(anchor=W, relx=0.5, rely=0.5)
 
     ## 将书籍从输入框添加进缓存区
