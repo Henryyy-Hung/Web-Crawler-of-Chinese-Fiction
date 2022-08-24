@@ -224,6 +224,7 @@ class SpiderGUI(object):
 
     ## 初始化窗口
     def __init__(self):
+        ## 根据不同平台放大尺寸
         self.window_size = 1
         if platform.release() == "10":
             self.window_size = 1

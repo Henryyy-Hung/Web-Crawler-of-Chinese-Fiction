@@ -18,7 +18,7 @@ def process_paragraph(string):
     ## 清除剩余html元素
     string = re.sub(pattern=r'<.*?>.*？<.*?>;', repl="", string=string, flags=re.DOTALL)
     ## 翻译剩余html语言
-    translate = {'<br>':'\n', '<br/>':'\n', '<br />':'\n', '<p>':'', '</p>':'\n', ' ':' '}
+    translate = {'<br>':'\n', '<br/>':'\n', '<br />':'\n', '<p>':'', '</p>':'\n', ' ':' ', '&nbsp;': ' '}
     for key in translate.keys():
         string = string.replace(key, translate[key])
     ## 分行
@@ -56,7 +56,7 @@ def process_line(line, title_of_chapter = "No_Such_title"):
         if unwanted_keyword in line:
             return ""
     ## 删除关键词
-    unwanted_words = ["&nbsp;", "&emsp;", "&ldquo;", "&rdquo;", "&lt;", "&rt;", "\n", '\r', '\n\r', '\r\n', "文学网"]
+    unwanted_words = ["&nbsp;", "&emsp;", "&ldquo;", "&rdquo;", "&lt;", "&rt;", "\n", '\r', '\n\r', '\r\n']
     for unwanted_word in unwanted_words:
         line = line.replace(unwanted_word, "")
     ## 替换关键词

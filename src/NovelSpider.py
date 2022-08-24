@@ -519,8 +519,8 @@ class NovelSpider(object):
         self.stop_chapter = len(self.url_of_chapters)
         self.total_chapter = self.stop_chapter - self.start_chapter
         ## 限制速度
-        if self.speed_of_crawling > 8:
-             self.__speed_of_crawling = 8
+        if self.speed_of_crawling > 5:
+             self.__speed_of_crawling = 5
         ## 定义访问率
         access_rate = 1 / self.speed_of_crawling
         ## 输出书籍信息到屏幕上
@@ -590,31 +590,25 @@ class NovelSpider(object):
 
     ## 预定义指定网站的参数
     def auto_setting(self, url):
-        if r'aabook.xyz' in url:
+        ## 兼容就旧书单中的错误域名
+        if r'www.31xs.net' in url:
+            url = url.replace(r'www.31xs.net', r'www.31xs.com')
+
+        ## 小说网站
+        ## 31小说网
+        if r'www.31xs.com' in url:
             self.url_of_book = url
-            self.base_url = r'https://aabook.xyz/'
+            self.base_url = r'https://www.31xs.com'
             self.encode = r'UTF-8'
-            self.regx_of_book_title = [r'<h1 class="index_title">(.*?)</h1>']
-            self.regx_of_book_author = [r'<p class="index_info"><span>作者：(.*?)</span></p>']
-            self.regx_of_chap_href = [r'<p class="index_info">.*?<p class="section_title">作品相关</p>(.*?)<p class="section_title">性福宝排行榜</p>', r'<li><a href="(.*?)" title=.*?</a></li>|<p class="section_title">(.*?)</p>']
-            self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
-            self.regx_of_chap_title = [r'<h1 class="chapter_title">(.*?)</h1>']
-            self.regx_of_chap_content = [r'<div class="chapter_con" id="chapter_content">(.*?)</div>', r'<p>(.*?)</p>']
-            self.speed_of_crawling = 0.8
-            self.crawler_mode = 'selenium'
-        elif r'www.31xs.net' in url or r'www.31xs.com' in url:
-            url = url.replace(r'www.31xs.com', r'www.31xs.net')
-            self.url_of_book = url
-            self.base_url = r'https://www.31xs.net'
-            self.encode = r'UTF-8'
-            self.regx_of_book_title = [r'<meta property="og:novel:book_name" content="(.*?)" />']
-            self.regx_of_book_author = [r'<meta property="og:novel:author" content="(.*?)" />']
-            self.regx_of_chap_href = [r'<dd><a href="(.*?)">.*?</a></dd>']
+            self.regx_of_book_title = [r'<div id="info">(.*?)</div>', r'<h1>(.*?)</h1>']
+            self.regx_of_book_author = [r'<div id="info">(.*?)</div>', r'<p>作.*?者：(.*?)</p>']
+            self.regx_of_chap_href = [r'<div id="list">(.*?)</div>', r'<dl>(.*?)</dl>', r'<dd><a href="(.*?)">.*?</a></dd>']
             self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<h1>(.*?)</h1>']
             self.regx_of_chap_content = [r'<p>(.*?)</p>']
-            self.speed_of_crawling = 30
+            self.speed_of_crawling = 5
             self.crawler_mode = 'requests'
+        ## 飘天文学网
         elif r'www.ptwxz.com' in url:
             self.url_of_book = url
             self.base_url = url
@@ -625,8 +619,9 @@ class NovelSpider(object):
             self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<[Hh]1><a href=".*?">.*</a>(.*?)</[Hh]1>']
             self.regx_of_chap_content = [r'&nbsp;&nbsp;&nbsp;&nbsp;(.*?)<']
-            self.speed_of_crawling = 30
+            self.speed_of_crawling = 5
             self.crawler_mode = 'requests'
+        ## UU看书
         elif r'www.uuks.org' in url:
             self.url_of_book = url
             self.base_url = r'https://www.uuks.org'
@@ -637,8 +632,9 @@ class NovelSpider(object):
             self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<h1 id="timu">(.*?)</h1>']
             self.regx_of_chap_content = [r'<p>(.*?)</p>']
-            self.speed_of_crawling = 30
+            self.speed_of_crawling = 5
             self.crawler_mode = 'requests'
+        ## 笔趣阁
         elif r'www.bqxs520.com' in url:
             self.url_of_book = url
             self.base_url = r'http://www.bqxs520.com'
@@ -649,8 +645,9 @@ class NovelSpider(object):
             self.key_of_content = {'start': 9, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<h1>\s?(.*?)</h1>']
             self.regx_of_chap_content = [r'br\s*/>(.*?)<']
-            self.speed_of_crawling = 30
+            self.speed_of_crawling = 5
             self.crawler_mode = 'requests'
+        ## 爱笔楼
         elif r'www.ibiquge.net' in url:
             self.url_of_book = url
             self.base_url = r'https://www.ibiquge.net'
@@ -661,20 +658,38 @@ class NovelSpider(object):
             self.key_of_content = {'start': 12, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<h1>(.*?)</h1>']
             self.regx_of_chap_content = [r'&nbsp;(.*?)<|\s']
-            self.speed_of_crawling = 20
+            self.speed_of_crawling = 5
             self.crawler_mode = 'requests'
+
+        ## 黄文网站
+        ## 禁忌书屋
         elif r'www.book18.org' in url:
             self.url_of_book = url
             self.base_url = r'https://www.book18.org'
             self.encode = r'UTF-8'
             self.regx_of_book_title = [r'<h1>(.*?)</h1>']
             self.regx_of_book_author = [r'作者：(.*?)</.*?>']
-            self.regx_of_chap_href = [r'<li class="list-group-item px-2"><a href="(.*?)" target="_blank"><b class="mr-1">.*?</a></li>']
+            self.regx_of_chap_href = [r'<li class="list-group-item.*?"><a href="(.*?)".*?>.*?</a></li>']
             self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
             self.regx_of_chap_title = [r'<h1.*?>(.*?)</h1>']
-            self.regx_of_chap_content = [r'<div id="content" style="overflow:hidden;max-width:1000px;">(.*?)</div>']
-            self.speed_of_crawling = 20
+            self.regx_of_chap_content = [r'<div id="content".*?>(.*?)</div>']
+            self.speed_of_crawling = 5
             self.crawler_mode = 'requests'
+        ## 疯情书屋
+        elif r'aabook.xyz' in url:
+            self.url_of_book = url
+            self.base_url = r'https://aabook.xyz/'
+            self.encode = r'UTF-8'
+            self.regx_of_book_title = [r'<h1 class="index_title">(.*?)</h1>']
+            self.regx_of_book_author = [r'<p class="index_info"><span>作者：(.*?)</span></p>']
+            self.regx_of_chap_href = [r'<p class="index_info">.*?<p class="section_title">作品相关</p>(.*?)<p class="section_title">性福宝排行榜</p>', r'<li><a href="(.*?)" title=.*?</a></li>|<p class="section_title">(.*?)</p>']
+            self.key_of_content = {'start': 0, 'stop': None, 'step': 1}
+            self.regx_of_chap_title = [r'<h1 class="chapter_title">(.*?)</h1>']
+            self.regx_of_chap_content = [r'<div class="chapter_con" id="chapter_content">(.*?)</div>', r'<p>(.*?)</p>']
+            self.speed_of_crawling = 1
+            self.crawler_mode = 'selenium'
+
+        ## 其他情况
         else:
             self.url_of_book = url
             self.base_url = r''
