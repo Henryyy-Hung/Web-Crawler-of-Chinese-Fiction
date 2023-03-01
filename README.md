@@ -7,6 +7,9 @@
 * 教程：[**点此查看使用方法**](#使用方法)，请务必跟着教程一步一步来。
 * 备注：如有任何问题，请用我主页上的email联络我。如果仅仅是手机在线阅读，请使用[【阅读v3.0】](https://github.com/gedoor/legado)，这款软件会更加方便。
 
+[**点此下载最新版**](https://github.com/Henryyy-Hung/Web-Crawler-of-Chinese-Fiction/raw/main/exe/%E5%B0%8F%E8%AF%B4%E7%88%AC%E8%99%ABv1.1.5.exe)|
+---|
+
 ## 预览图片
 <img src="https://user-images.githubusercontent.com/78750074/179153333-c544e2c9-b499-43d4-96a2-79edf1a1ee0c.jpg" alt="demo" width="640" height="320" />
 <img src="https://user-images.githubusercontent.com/78750074/183332140-c4bde035-b525-4735-84ae-fe09266128f4.png" alt="booklist" width="640" height="320" />
